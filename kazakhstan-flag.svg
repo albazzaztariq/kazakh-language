@@ -1,0 +1,104 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 400">
+  <!-- Sky blue background -->
+  <rect width="640" height="400" fill="#00AFCA"/>
+
+  <!-- Ornamental pattern (koshkar-muyiz / ram's horns) along left side -->
+  <g transform="translate(48, 200)" fill="none" stroke="#FFD700" stroke-width="3">
+    <!-- Top ornament -->
+    <g transform="translate(0, -140)">
+      <path d="M0,0 C-15,-20 -15,-40 0,-50 C15,-40 15,-20 0,0" fill="#FFD700"/>
+      <path d="M0,-50 C-10,-60 -10,-75 0,-80 C10,-75 10,-60 0,-50" fill="#FFD700"/>
+      <path d="M-12,-25 C-25,-25 -30,-35 -25,-45" stroke="#FFD700" fill="none" stroke-width="2.5"/>
+      <path d="M12,-25 C25,-25 30,-35 25,-45" stroke="#FFD700" fill="none" stroke-width="2.5"/>
+    </g>
+    <!-- Upper middle ornament -->
+    <g transform="translate(0, -70)">
+      <path d="M0,0 C-15,-20 -15,-40 0,-50 C15,-40 15,-20 0,0" fill="#FFD700"/>
+      <path d="M0,-50 C-10,-60 -10,-75 0,-80 C10,-75 10,-60 0,-50" fill="#FFD700"/>
+      <path d="M-12,-25 C-25,-25 -30,-35 -25,-45" stroke="#FFD700" fill="none" stroke-width="2.5"/>
+      <path d="M12,-25 C25,-25 30,-35 25,-45" stroke="#FFD700" fill="none" stroke-width="2.5"/>
+    </g>
+    <!-- Center ornament -->
+    <g transform="translate(0, 0)">
+      <path d="M0,0 C-15,-20 -15,-40 0,-50 C15,-40 15,-20 0,0" fill="#FFD700"/>
+      <path d="M0,-50 C-10,-60 -10,-75 0,-80 C10,-75 10,-60 0,-50" fill="#FFD700"/>
+      <path d="M-12,-25 C-25,-25 -30,-35 -25,-45" stroke="#FFD700" fill="none" stroke-width="2.5"/>
+      <path d="M12,-25 C25,-25 30,-35 25,-45" stroke="#FFD700" fill="none" stroke-width="2.5"/>
+    </g>
+    <!-- Lower middle ornament -->
+    <g transform="translate(0, 70)">
+      <path d="M0,0 C-15,-20 -15,-40 0,-50 C15,-40 15,-20 0,0" fill="#FFD700"/>
+      <path d="M0,-50 C-10,-60 -10,-75 0,-80 C10,-75 10,-60 0,-50" fill="#FFD700"/>
+      <path d="M-12,-25 C-25,-25 -30,-35 -25,-45" stroke="#FFD700" fill="none" stroke-width="2.5"/>
+      <path d="M12,-25 C25,-25 30,-35 25,-45" stroke="#FFD700" fill="none" stroke-width="2.5"/>
+    </g>
+    <!-- Bottom ornament -->
+    <g transform="translate(0, 140)">
+      <path d="M0,0 C-15,-20 -15,-40 0,-50 C15,-40 15,-20 0,0" fill="#FFD700"/>
+      <path d="M0,-50 C-10,-60 -10,-75 0,-80 C10,-75 10,-60 0,-50" fill="#FFD700"/>
+      <path d="M-12,-25 C-25,-25 -30,-35 -25,-45" stroke="#FFD700" fill="none" stroke-width="2.5"/>
+      <path d="M12,-25 C25,-25 30,-35 25,-45" stroke="#FFD700" fill="none" stroke-width="2.5"/>
+    </g>
+    <!-- Vertical connecting lines -->
+    <line x1="0" y1="-190" x2="0" y2="190" stroke="#FFD700" stroke-width="2"/>
+  </g>
+
+  <!-- Sun with 32 rays -->
+  <g transform="translate(340, 160)">
+    <!-- 32 sun rays -->
+    <g fill="#FFD700">
+      <polygon points="0,-90 -4,-60 4,-60" transform="rotate(0)"/>
+      <polygon points="0,-90 -4,-60 4,-60" transform="rotate(11.25)"/>
+      <polygon points="0,-90 -4,-60 4,-60" transform="rotate(22.5)"/>
+      <polygon points="0,-90 -4,-60 4,-60" transform="rotate(33.75)"/>
+      <polygon points="0,-90 -4,-60 4,-60" transform="rotate(45)"/>
+      <polygon points="0,-90 -4,-60 4,-60" transform="rotate(56.25)"/>
+      <polygon points="0,-90 -4,-60 4,-60" transform="rotate(67.5)"/>
+      <polygon points="0,-90 -4,-60 4,-60" transform="rotate(78.75)"/>
+      <polygon points="0,-90 -4,-60 4,-60" transform="rotate(90)"/>
+      <polygon points="0,-90 -4,-60 4,-60" transform="rotate(101.25)"/>
+      <polygon points="0,-90 -4,-60 4,-60" transform="rotate(112.5)"/>
+      <polygon points="0,-90 -4,-60 4,-60" transform="rotate(123.75)"/>
+      <polygon points="0,-90 -4,-60 4,-60" transform="rotate(135)"/>
+      <polygon points="0,-90 -4,-60 4,-60" transform="rotate(146.25)"/>
+      <polygon points="0,-90 -4,-60 4,-60" transform="rotate(157.5)"/>
+      <polygon points="0,-90 -4,-60 4,-60" transform="rotate(168.75)"/>
+      <polygon points="0,-90 -4,-60 4,-60" transform="rotate(180)"/>
+      <polygon points="0,-90 -4,-60 4,-60" transform="rotate(191.25)"/>
+      <polygon points="0,-90 -4,-60 4,-60" transform="rotate(202.5)"/>
+      <polygon points="0,-90 -4,-60 4,-60" transform="rotate(213.75)"/>
+      <polygon points="0,-90 -4,-60 4,-60" transform="rotate(225)"/>
+      <polygon points="0,-90 -4,-60 4,-60" transform="rotate(236.25)"/>
+      <polygon points="0,-90 -4,-60 4,-60" transform="rotate(247.5)"/>
+      <polygon points="0,-90 -4,-60 4,-60" transform="rotate(258.75)"/>
+      <polygon points="0,-90 -4,-60 4,-60" transform="rotate(270)"/>
+      <polygon points="0,-90 -4,-60 4,-60" transform="rotate(281.25)"/>
+      <polygon points="0,-90 -4,-60 4,-60" transform="rotate(292.5)"/>
+      <polygon points="0,-90 -4,-60 4,-60" transform="rotate(303.75)"/>
+      <polygon points="0,-90 -4,-60 4,-60" transform="rotate(315)"/>
+      <polygon points="0,-90 -4,-60 4,-60" transform="rotate(326.25)"/>
+      <polygon points="0,-90 -4,-60 4,-60" transform="rotate(337.5)"/>
+      <polygon points="0,-90 -4,-60 4,-60" transform="rotate(348.75)"/>
+    </g>
+    <!-- Sun disc -->
+    <circle r="55" fill="#FFD700"/>
+  </g>
+
+  <!-- Steppe Eagle -->
+  <g transform="translate(340, 270)" fill="#FFD700">
+    <!-- Eagle body -->
+    <ellipse cx="0" cy="0" rx="12" ry="20"/>
+    <!-- Eagle head -->
+    <circle cx="0" cy="-24" r="8"/>
+    <!-- Beak -->
+    <polygon points="0,-20 12,-22 0,-18"/>
+    <!-- Left wing spread -->
+    <path d="M-10,-5 C-30,-25 -70,-35 -100,-20 C-80,-15 -50,-5 -10,5 Z"/>
+    <path d="M-100,-20 C-105,-25 -110,-22 -108,-18" />
+    <!-- Right wing spread -->
+    <path d="M10,-5 C30,-25 70,-35 100,-20 C80,-15 50,-5 10,5 Z"/>
+    <path d="M100,-20 C105,-25 110,-22 108,-18"/>
+    <!-- Tail feathers -->
+    <path d="M-8,18 L-12,40 L0,35 L12,40 L8,18 Z"/>
+  </g>
+</svg>
