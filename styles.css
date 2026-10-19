@@ -385,3 +385,22 @@ footer {
     .lesson-table th, .lesson-table td { padding: 9px 8px; font-size: 0.9rem; }
     .speak { width: 36px; height: 36px; margin-right: 8px; }
 }
+
+/* ---- Mobile Chrome fixes ---- */
+html {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+}
+
+.lesson-section {
+    overflow-x: auto;
+}
+
+.lesson-table td,
+.lesson-table th {
+    overflow-wrap: anywhere;
+}
+
+.back-link {
+    padding: 12px 0;
+}
