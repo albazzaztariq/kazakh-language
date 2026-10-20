@@ -651,6 +651,69 @@ html {
     cursor: default;
 }
 
+.deck-size {
+    margin: 0 0 22px;
+    text-align: center;
+}
+
+.deck-size-label {
+    display: block;
+    margin-bottom: 8px;
+    font-size: 0.95rem;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #FFE44D;
+}
+
+.deck-size-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.deck-size-row input[type="range"] {
+    flex: 1;
+    min-width: 0;
+    height: 28px;
+    accent-color: #FFD700;
+    cursor: pointer;
+}
+
+.deck-size-row input[type="text"] {
+    width: 4.2em;
+    padding: 8px 6px;
+    font: inherit;
+    font-size: 1.2rem;
+    font-weight: 700;
+    text-align: center;
+    color: #1a1a2e;
+    background: rgba(255, 255, 255, 0.9);
+    border: 2px solid #DAA520;
+    border-radius: 10px;
+}
+
+.deck-size-msg:empty,
+.deck-size-note:empty {
+    display: none;
+}
+
+.deck-size-msg {
+    display: inline-block;
+    margin-top: 10px;
+    padding: 5px 14px;
+    font-weight: 700;
+    color: #ffffff;
+    background: #d64545;
+    border-radius: 999px;
+}
+
+.deck-size-note {
+    margin-top: 8px;
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.85);
+}
+
 .game [hidden] {
     display: none !important;
 }
