@@ -10,7 +10,7 @@ Method : a deck is N random cards, N set by a slider plus text field (5 to 50; t
          Scoring: every card is worth 100/N points and its three possible wrong picks each cost a third of that, so
          score = 100 x (1 - wrong picks / (N x 3)). All first-try = 100; a card needing all three wrong picks first = 0 for that card.
          The score appears only after the last card, with "Repeat This Deck" and "Generate New Deck".
-         Keys 1-4 also pick a choice.
+         Keys 1-4 also pick a choice. A speaker button on the word card plays its clip (Common Words/Words Audio/); nothing plays automatically.
 Output : game.html (styles live in styles.css under "Word game").
 """
 import re, json, html
@@ -22,6 +22,9 @@ for sid, title, body in re.findall(r'<section class="lesson-section" id="([^"]+)
     for kk, en in re.findall(r'</button>(.*?)</td><td class="c1">.*?</td><td class="c2">(.*?)</td>', body):
         cards.append({"k": html.unescape(kk), "e": html.unescape(en), "s": sid})
 print(f"[DEBUG] {len(cards)} cards from {len(set(c['s'] for c in cards))} sections", flush=True)
+import os
+missing = [c["k"] for c in cards if not os.path.exists(W + "Common Words/Words Audio/" + "-".join(f"{ord(ch):x}" for ch in c["k"]) + ".mp3")]
+assert not missing, f"no audio clip for {missing}"   # the speaker button loads these files, so every card needs one
 
 JS = r"""
         const STOP = new Set(['to', 'a', 'the', 'of', 'or', 'and', 'in']);
@@ -106,7 +109,22 @@ JS = r"""
         });
         numEl.addEventListener('keydown', e => { if (e.key === 'Enter') numEl.blur(); });
 
+        // Speaker button: plays the word's clip from Common Words/Words Audio/ (file name = the word's code points in hex). Never plays by itself.
+        const speakEl = document.getElementById('speak');
+        let audio = null;
+        const clipUrl = w => 'Common%20Words/Words%20Audio/' + [...w].map(c => c.codePointAt(0).toString(16)).join('-') + '.mp3';
+        function stopAudio() { if (audio) { audio.pause(); audio = null; } speakEl.classList.remove('playing'); }
+        speakEl.addEventListener('click', () => {
+            stopAudio();
+            audio = new Audio(clipUrl(current.k));
+            const done = () => speakEl.classList.remove('playing');
+            audio.onended = done; audio.onerror = done;
+            speakEl.classList.add('playing');
+            audio.play().catch(done);
+        });
+
         function nextCard() {
+            stopAudio();
             if (!deck.length) { finishDeck(); return; }
             current = deck.pop(); locked = false;
             wordEl.textContent = current.k;
@@ -148,7 +166,7 @@ page = """<!DOCTYPE html>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>%(title)s</title>
-    <link rel="stylesheet" href="styles.css?v=8">
+    <link rel="stylesheet" href="styles.css?v=9">
     <meta name="description" content="%(desc)s">
     <link rel="canonical" href="https://albazzaztariq.github.io/kazakh-language/game.html">
     <meta name="theme-color" content="#00AFCA">
@@ -179,7 +197,12 @@ page = """<!DOCTYPE html>
                 <div class="tally-digits" id="count" aria-label="Cards completed: 0"></div>
             </div>
             <div id="play">
-                <div class="game-word" id="word" lang="kk"></div>
+                <div class="game-word">
+                    <span id="word" lang="kk"></span>
+                    <button type="button" class="speak game-speak" id="speak" aria-label="Play this word">
+                        <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path fill="currentColor" d="M3 9v6h4l5 4V5L7 9H3zm13.5 3a4.5 4.5 0 0 0-2.5-4v8a4.5 4.5 0 0 0 2.5-4zM14 3.2v2.1a7 7 0 0 1 0 13.4v2.1a9 9 0 0 0 0-17.6z"/></svg>
+                    </button>
+                </div>
                 <div class="game-choices" id="choices"></div>
             </div>
             <div class="game-result" id="result" hidden>

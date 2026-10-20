@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kazakh Word Game: Flash Cards for Common Words</title>
-    <link rel="stylesheet" href="styles.css?v=8">
+    <link rel="stylesheet" href="styles.css?v=9">
     <meta name="description" content="Practice common Kazakh words with a flash-card game: see the word, pick the English meaning from four choices, 20 cards per deck.">
     <link rel="canonical" href="https://albazzaztariq.github.io/kazakh-language/game.html">
     <meta name="theme-color" content="#00AFCA">
@@ -35,7 +35,12 @@
                 <div class="tally-digits" id="count" aria-label="Cards completed: 0"></div>
             </div>
             <div id="play">
-                <div class="game-word" id="word" lang="kk"></div>
+                <div class="game-word">
+                    <span id="word" lang="kk"></span>
+                    <button type="button" class="speak game-speak" id="speak" aria-label="Play this word">
+                        <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path fill="currentColor" d="M3 9v6h4l5 4V5L7 9H3zm13.5 3a4.5 4.5 0 0 0-2.5-4v8a4.5 4.5 0 0 0 2.5-4zM14 3.2v2.1a7 7 0 0 1 0 13.4v2.1a9 9 0 0 0 0-17.6z"/></svg>
+                    </button>
+                </div>
                 <div class="game-choices" id="choices"></div>
             </div>
             <div class="game-result" id="result" hidden>
@@ -143,7 +148,22 @@
         });
         numEl.addEventListener('keydown', e => { if (e.key === 'Enter') numEl.blur(); });
 
+        // Speaker button: plays the word's clip from Common Words/Words Audio/ (file name = the word's code points in hex). Never plays by itself.
+        const speakEl = document.getElementById('speak');
+        let audio = null;
+        const clipUrl = w => 'Common%20Words/Words%20Audio/' + [...w].map(c => c.codePointAt(0).toString(16)).join('-') + '.mp3';
+        function stopAudio() { if (audio) { audio.pause(); audio = null; } speakEl.classList.remove('playing'); }
+        speakEl.addEventListener('click', () => {
+            stopAudio();
+            audio = new Audio(clipUrl(current.k));
+            const done = () => speakEl.classList.remove('playing');
+            audio.onended = done; audio.onerror = done;
+            speakEl.classList.add('playing');
+            audio.play().catch(done);
+        });
+
         function nextCard() {
+            stopAudio();
             if (!deck.length) { finishDeck(); return; }
             current = deck.pop(); locked = false;
             wordEl.textContent = current.k;

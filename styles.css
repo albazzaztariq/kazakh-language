@@ -602,7 +602,8 @@ html {
 
 .game-word {
     margin: 0 0 26px;
-    padding: 28px 12px;
+    position: relative;
+    padding: 28px 56px;
     text-align: center;
     font-size: 2.6rem;
     font-weight: 700;
@@ -611,6 +612,15 @@ html {
     background: rgba(255, 255, 255, 0.12);
     border: 2px solid rgba(255, 215, 0, 0.4);
     border-radius: 16px;
+}
+
+.game-speak {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 40px;
+    height: 40px;
+    margin: 0;
 }
 
 .game-choices {
@@ -760,7 +770,7 @@ html {
 }
 
 @media (max-width: 480px) {
-    .game-word { font-size: 2rem; padding: 22px 10px; }
+    .game-word { font-size: 2rem; padding: 22px 52px; }
     .tally-digits { font-size: 2rem; }
     .result-score { font-size: 4rem; }
     .choice { font-size: 1rem; padding: 15px 10px; }
