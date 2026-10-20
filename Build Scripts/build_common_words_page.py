@@ -42,7 +42,7 @@ FOOD_MORE = [("сиыр еті", "si-yr e-ti", "beef"), ("қой еті", "qoi e
 # ---- assemble sections in page order: (anchor id, title, rows, pill label or None) --------------------------------------
 SEC = []
 def add(i, title, rows, pill=None): SEC.append((i, title, rows, pill))
-add("basics", "Greetings & basics", WORDS["Greetings & basics"], "Basics")
+add("basics", "Greetings & basics", WORDS["Greetings & basics"] + WORDS["Useful phrases"], "Basics")   # useful phrases merged in
 add("pronouns", "Pronouns", WORDS["Pronouns"], "Pronouns")
 add("questions", "Question words", WORDS["Question words"], "Questions")
 add("people", "People", WORDS["People"], "People")
@@ -61,7 +61,6 @@ add("animals", "Animals", WORDS["Animals"] + [("тауық", "ta-uyq", "chicken 
 add("body", "Body", WORDS["Body"], "Body")
 add("nature", "Nature", WORDS["Nature"], "Nature")
 add("places", "Places", WORDS["Places"], "Places")
-add("phrases", "Useful phrases", WORDS["Useful phrases"], "Phrases")
 
 # ---- audio ---------------------------------------------------------------------------------------------------------------
 os.makedirs(AD, exist_ok=True)
