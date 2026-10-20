@@ -368,17 +368,17 @@ print(f"[DEBUG] {len(rows)} rows, {len(audio)} clips", flush=True)
 
 title = "Core Kazakh Words - The 300 Most Frequent Words with Audio"
 desc = "The 300 most frequent Kazakh words with English meanings, audio and common forms, ranked from spoken and written corpora."
-intro = ("These are the 300 most frequent Kazakh words, ranked by how often they appear in spoken subtitles and in written news and Wikipedia text. "
-         "Each word is shown in dictionary form (verbs end in -у), and the last column lists the forms you will actually see, so мен, менің and маған count as one word. "
-         "A small set of words does most of the work in any language: in a test on separate Kazakh sentences, these 300 made up about 54% of all the words. "
-         "Learn these first and about every second word you hear or read will already be familiar, which is the base everything else builds on.")
+intro = ("Common Words groups everyday vocabulary by topic; this page ranks words by how often Kazakh uses them. "
+         "We counted about 2.2 million words (0.4 million of movie subtitles, 1.8 million of news and Wikipedia) and merged word forms, so мен, менің and маған count once. "
+         "These 300 words make up 64% of the subtitles and 47% of the news and Wikipedia text (the top 100 make up 49% and 34%, the top 200 make up 59% and 42%). "
+         "Verbs are shown in dictionary form (ending in -у), and the last column lists the forms that appear.")
 html = f"""<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{title}</title>
-    <link rel="stylesheet" href="styles.css?v=4">
+    <link rel="stylesheet" href="styles.css?v=5">
     <meta name="description" content="{desc}">
     <link rel="canonical" href="https://albazzaztariq.github.io/kazakh-language/core-words.html">
     <meta name="theme-color" content="#00AFCA">

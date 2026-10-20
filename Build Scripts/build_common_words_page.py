@@ -1,9 +1,7 @@
-"""Rebuild common-words.html with numbers up to a million, more food and adjectives, and jump links at the top.
-
-Inputs : the WORDS table inside kazakh_build_pages.py (loaded with exec, so the older sections stay the single source of truth);
+"""Rebuild common-words.html with more food and adjectives and jump links at the top (numbers now live on numbers.html).
+Inputs : the WORDS table inside kazakh_build_pages.py (loaded with exec, so the older sections stay the single source of truth);
          the existing common-words.html (its <head>/SEO block is kept as is); clips cached in Common Words/Words Audio/.
-Method : replaces the Numbers section with 0-10, the 11-19 pattern (only 11 and 19), tens, a few hundreds/thousands up to a million and four "building numbers" examples (patterns, not every number); replaces Adjectives with four
-         opposite-pair groups; extends Food (chicken, beef, mutton, fish, egg ...) and Animals (chicken). Any new word gets a clip from the male
+Method : replaces Adjectives with four opposite-pair groups; extends Food (chicken, beef, mutton, fish, egg ...) and Animals (chicken). Any new word gets a clip from the male
          voice kk-KZ-DauletNeural (rate -10%, trimmed, peak 0.4, same recipe as before) and the clips are embedded as base64.
          Every section gets an id, and a row of small pill links at the top jumps to each topic.
 Output : common-words.html (overwritten). Other pages are not touched.
@@ -17,17 +15,6 @@ src = open(W + "Build Scripts/kazakh_build_pages.py", encoding="utf-8").read()
 ns = {}
 exec(src[src.index("WORDS = ["):src.index("WORDS_INTRO")], ns)
 WORDS = dict(ns["WORDS"])
-
-# ---- numbers up to a million ------------------------------------------------------------------------------------------
-ONES = [("нөл", "nöl", "0"), ("бір", "bir", "1"), ("екі", "e-ki", "2"), ("үш", "üsh", "3"), ("төрт", "tört", "4"), ("бес", "bes", "5"),
-        ("алты", "al-ty", "6"), ("жеті", "zhe-ti", "7"), ("сегіз", "se-giz", "8"), ("тоғыз", "to-ghyz", "9"), ("он", "on", "10")]
-TEENS = [("он бір", "on bir", "11"), ("он тоғыз", "on to-ghyz", "19")]          # ten + a digit; the rest follow the same pattern
-TENS = [("жиырма", "zhi-yr-ma", "20"), ("отыз", "o-tyz", "30"), ("қырық", "qy-ryq", "40"), ("елу", "e-lu", "50"),
-        ("алпыс", "al-pys", "60"), ("жетпіс", "zhet-pis", "70"), ("сексен", "sek-sen", "80"), ("тоқсан", "toq-san", "90")]
-BIG = [("жүз", "zhüz", "100"), ("екі жүз", "e-ki zhüz", "200"), ("мың", "myñ", "1,000"), ("он мың", "on myñ", "10,000"),
-       ("жүз мың", "zhüz myñ", "100,000"), ("миллион", "mil-li-on", "1,000,000")]
-BUILD = [("жиырма бір", "zhi-yr-ma bir", "21"), ("жүз жиырма үш", "zhüz zhi-yr-ma üsh", "123"),
-         ("үш жүз қырық бес", "üsh zhüz qy-ryq bes", "345"), ("екі мың жиырма алты", "e-ki myñ zhi-yr-ma al-ty", "2,026")]
 
 # ---- adjectives (opposite pairs together) -----------------------------------------------------------------------------
 ADJ_SIZE = [("үлкен", "ül-ken", "big"), ("кіші", "ki-shi", "small"), ("кішкентай", "kish-ken-tai", "little / tiny"),
@@ -58,11 +45,6 @@ def add(i, title, rows, pill=None): SEC.append((i, title, rows, pill))
 add("basics", "Greetings & basics", WORDS["Greetings & basics"], "Basics")
 add("pronouns", "Pronouns", WORDS["Pronouns"], "Pronouns")
 add("questions", "Question words", WORDS["Question words"], "Questions")
-add("numbers", "Numbers 0-10", ONES, "Numbers")
-add("numbers-11-19", "Numbers 11-19: ten + a digit", TEENS)
-add("tens", "Tens (20-90)", TENS)
-add("big-numbers", "Hundreds, thousands, a million", BIG)
-add("building-numbers", "Building numbers: say the biggest part first", BUILD)
 add("people", "People", WORDS["People"], "People")
 add("verbs", "Verbs (dictionary form ends in -у)", WORDS["Verbs (dictionary form ends in -у)"], "Verbs")
 add("adjectives", "Adjectives: size and shape", ADJ_SIZE, "Adjectives")
