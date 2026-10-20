@@ -498,11 +498,36 @@ html {
     overflow-x: auto;
 }
 
+/* Never break a word in the middle: tables must fit by design (smaller type on phones), checked by Build Scripts/check_page_layout.py */
 .lesson-table td,
 .lesson-table th {
-    overflow-wrap: anywhere;
+    overflow-wrap: normal;
+    word-break: normal;
+    hyphens: none;
+}
+
+.type-tag {
+    display: block;
+    margin-top: 2px;
+    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.6);
 }
 
 .back-link {
     padding: 12px 0;
+}
+
+/* ---- Phones: keep every table word whole ---- */
+@media (max-width: 480px) {
+    .lesson-table th { padding: 8px 5px; font-size: 0.66rem; letter-spacing: 0; }
+    .lesson-table td { padding: 8px 5px; font-size: 0.82rem; }
+    .speak { width: 30px; height: 30px; margin-right: 5px; }
+}
+
+/* ---- Very narrow phones (320-360px): tighter tables so four-column tables still fit ---- */
+@media (max-width: 360px) {
+    .container { padding: 24px 10px; }
+    .lesson-table th { padding: 7px 3px; font-size: 0.58rem; }
+    .lesson-table td { padding: 7px 3px; font-size: 0.74rem; }
+    .speak { width: 26px; height: 26px; margin-right: 4px; }
 }

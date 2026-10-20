@@ -5,7 +5,7 @@ Inputs : Temp/core_vocabulary.tsv (ranked lemmas, from Temp/build_core_list.py);
 Method : verbs are shown in the dictionary form ending in -u (stem + у, with п/қ/к -> б/ғ/г); a few nouns get their dictionary vowel back
          (алд -> алды). Each displayed word is spoken by the male Kazakh voice kk-KZ-DauletNeural (rate -10%, silence trimmed, peak 0.4,
          same recipe as the common-words page); clips are cached in Core Words/Words Audio/ and embedded in the page as base64.
-Output : core-words.html (columns: Word with speaker button | English | Type | Common forms).
+Output : core-words.html (columns: Word with speaker button | English with the word type underneath | Common forms).
 """
 import csv, pickle, os, re, asyncio, base64, json, shutil, collections
 print("[DEBUG] core words page start", flush=True)
@@ -363,13 +363,13 @@ for r in rows:
     tot = sum(forms[lem].values()) or 1
     fs = [f for f, c in forms[lem].most_common(8) if f != word and f != lem and c >= max(4, 0.04 * tot)][:4]
     body += (f'<tr><td class="c0"><button class="speak" data-word="{word}" aria-label="Play {word}">{ICON}</button>{word}</td>'
-             f'<td>{GL[lem]}</td><td>{TYPE.get(lem) or POS.get(r["upos"], r["upos"].lower())}</td><td>{" ".join(fs)}</td></tr>\n')
+             f'<td>{GL[lem]}<span class="type-tag">{TYPE.get(lem) or POS.get(r["upos"], r["upos"].lower())}</span></td><td>{" ".join(fs)}</td></tr>\n')
 print(f"[DEBUG] {len(rows)} rows, {len(audio)} clips", flush=True)
 
 title = "Core Kazakh Words - The 300 Most Frequent Words with Audio"
 desc = "The 300 most frequent Kazakh words with English meanings, audio and common forms, ranked from spoken and written corpora."
 intro = ("These are the 300 most frequent Kazakh words, ranked by how often they appear in spoken subtitles and in written news and Wikipedia text. "
-         "Each word is shown in dictionary form (verbs end in -у), and the last column lists the forms you will actually meet, so мен, менің and маған count as one word. "
+         "Each word is shown in dictionary form (verbs end in -у), and the last column lists the forms you will actually see, so мен, менің and маған count as one word. "
          "A small set of words does most of the work in any language: in a test on separate Kazakh sentences, these 300 made up about 54% of all the words. "
          "Learn these first and about every second word you hear or read will already be familiar, which is the base everything else builds on.")
 html = f"""<!DOCTYPE html>
@@ -378,7 +378,7 @@ html = f"""<!DOCTYPE html>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{title}</title>
-    <link rel="stylesheet" href="styles.css?v=3">
+    <link rel="stylesheet" href="styles.css?v=4">
     <meta name="description" content="{desc}">
     <link rel="canonical" href="https://albazzaztariq.github.io/kazakh-language/core-words.html">
     <meta name="theme-color" content="#00AFCA">
@@ -394,7 +394,7 @@ html = f"""<!DOCTYPE html>
 
         <div class="divider"></div>
 
-        <section class="lesson-section"><table class="lesson-table"><thead><tr><th>Word</th><th>English</th><th>Type</th><th>Common forms</th></tr></thead><tbody>
+        <section class="lesson-section"><table class="lesson-table"><thead><tr><th>Word</th><th>English</th><th>Common forms</th></tr></thead><tbody>
 {body}</tbody></table></section>
 
         <div class="page-nav">
