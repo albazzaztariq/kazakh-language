@@ -651,8 +651,54 @@ html {
     cursor: default;
 }
 
+.game [hidden] {
+    display: none !important;
+}
+
+.game-result {
+    padding: 10px 0 4px;
+    text-align: center;
+}
+
+.result-label {
+    font-size: 1.05rem;
+    font-weight: 700;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: #FFE44D;
+    text-shadow: 0 0 10px rgba(255, 228, 77, 0.55);
+}
+
+.result-score {
+    margin: 6px 0 26px;
+    font-size: 5rem;
+    font-weight: 700;
+    line-height: 1.1;
+    color: #FFE44D;
+    text-shadow: 0 0 16px rgba(255, 228, 77, 0.6);
+}
+
+.result-max {
+    font-size: 1.6rem;
+    color: rgba(255, 255, 255, 0.8);
+    text-shadow: none;
+}
+
+.game-actions {
+    display: grid;
+    gap: 14px;
+}
+
+.game-actions .btn {
+    width: 100%;
+    padding-left: 0;
+    padding-right: 0;
+    text-align: center;
+}
+
 @media (max-width: 480px) {
     .game-word { font-size: 2rem; padding: 22px 10px; }
     .tally-digits { font-size: 2rem; }
+    .result-score { font-size: 4rem; }
     .choice { font-size: 1rem; padding: 15px 10px; }
 }

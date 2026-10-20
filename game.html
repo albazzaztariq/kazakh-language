@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kazakh Word Game: Flash Cards for Common Words</title>
-    <link rel="stylesheet" href="styles.css?v=6">
-    <meta name="description" content="Practice common Kazakh words with a flash-card game: see the word, pick the English meaning from four choices.">
+    <link rel="stylesheet" href="styles.css?v=7">
+    <meta name="description" content="Practice common Kazakh words with a flash-card game: see the word, pick the English meaning from four choices, 20 cards per deck.">
     <link rel="canonical" href="https://albazzaztariq.github.io/kazakh-language/game.html">
     <meta name="theme-color" content="#00AFCA">
 </head>
@@ -25,8 +25,18 @@
                 <span class="tally-label">Cards Completed</span>
                 <div class="tally-digits" id="count" aria-label="Cards completed: 0"></div>
             </div>
-            <div class="game-word" id="word" lang="kk"></div>
-            <div class="game-choices" id="choices"></div>
+            <div id="play">
+                <div class="game-word" id="word" lang="kk"></div>
+                <div class="game-choices" id="choices"></div>
+            </div>
+            <div class="game-result" id="result" hidden>
+                <div class="result-label">Score</div>
+                <div class="result-score"><span id="score">0</span><span class="result-max"> / 100</span></div>
+                <div class="game-actions">
+                    <button type="button" class="btn" id="repeat">Repeat This Deck</button>
+                    <button type="button" class="btn" id="fresh">Generate New Deck</button>
+                </div>
+            </div>
         </div>
 
         <div class="page-nav">
@@ -41,10 +51,13 @@
 
     <script>
         const CARDS = [{"k": "сәлем", "e": "hello", "s": "basics"}, {"k": "сау болыңыз", "e": "goodbye", "s": "basics"}, {"k": "рахмет", "e": "thank you", "s": "basics"}, {"k": "өтінемін", "e": "please", "s": "basics"}, {"k": "кешіріңіз", "e": "excuse me / sorry", "s": "basics"}, {"k": "иә", "e": "yes", "s": "basics"}, {"k": "жоқ", "e": "no / there is not", "s": "basics"}, {"k": "бар", "e": "there is", "s": "basics"}, {"k": "керек", "e": "needed / must", "s": "basics"}, {"k": "жақсы", "e": "good", "s": "basics"}, {"k": "мен", "e": "I", "s": "pronouns"}, {"k": "сен", "e": "you (informal)", "s": "pronouns"}, {"k": "сіз", "e": "you (formal)", "s": "pronouns"}, {"k": "ол", "e": "he / she / it", "s": "pronouns"}, {"k": "біз", "e": "we", "s": "pronouns"}, {"k": "сендер", "e": "you (plural)", "s": "pronouns"}, {"k": "олар", "e": "they", "s": "pronouns"}, {"k": "кім", "e": "who", "s": "questions"}, {"k": "не", "e": "what", "s": "questions"}, {"k": "қайда", "e": "where", "s": "questions"}, {"k": "қашан", "e": "when", "s": "questions"}, {"k": "неге", "e": "why", "s": "questions"}, {"k": "қалай", "e": "how", "s": "questions"}, {"k": "қанша", "e": "how much / many", "s": "questions"}, {"k": "қай", "e": "which", "s": "questions"}, {"k": "адам", "e": "person", "s": "people"}, {"k": "бала", "e": "child", "s": "people"}, {"k": "әке", "e": "father", "s": "people"}, {"k": "ана", "e": "mother", "s": "people"}, {"k": "аға", "e": "older brother", "s": "people"}, {"k": "апа", "e": "older sister", "s": "people"}, {"k": "дос", "e": "friend", "s": "people"}, {"k": "мұғалім", "e": "teacher", "s": "people"}, {"k": "болу", "e": "to be / become", "s": "verbs"}, {"k": "бару", "e": "to go", "s": "verbs"}, {"k": "келу", "e": "to come", "s": "verbs"}, {"k": "көру", "e": "to see", "s": "verbs"}, {"k": "білу", "e": "to know", "s": "verbs"}, {"k": "алу", "e": "to take", "s": "verbs"}, {"k": "беру", "e": "to give", "s": "verbs"}, {"k": "айту", "e": "to say", "s": "verbs"}, {"k": "жеу", "e": "to eat", "s": "verbs"}, {"k": "ішу", "e": "to drink", "s": "verbs"}, {"k": "оқу", "e": "to read / study", "s": "verbs"}, {"k": "жазу", "e": "to write", "s": "verbs"}, {"k": "тұру", "e": "to stand / live", "s": "verbs"}, {"k": "сөйлеу", "e": "to speak", "s": "verbs"}, {"k": "түсіну", "e": "to understand", "s": "verbs"}, {"k": "үлкен", "e": "big", "s": "adjectives"}, {"k": "кіші", "e": "small", "s": "adjectives"}, {"k": "кішкентай", "e": "little / tiny", "s": "adjectives"}, {"k": "ұзын", "e": "long", "s": "adjectives"}, {"k": "қысқа", "e": "short (length)", "s": "adjectives"}, {"k": "биік", "e": "tall / high", "s": "adjectives"}, {"k": "аласа", "e": "short / low (height)", "s": "adjectives"}, {"k": "қалың", "e": "thick", "s": "adjectives"}, {"k": "жұқа", "e": "thin (flat things)", "s": "adjectives"}, {"k": "жіңішке", "e": "thin / slender", "s": "adjectives"}, {"k": "арық", "e": "thin / skinny (a person)", "s": "adjectives"}, {"k": "кең", "e": "wide", "s": "adjectives"}, {"k": "тар", "e": "narrow", "s": "adjectives"}, {"k": "терең", "e": "deep", "s": "adjectives"}, {"k": "жылдам", "e": "fast", "s": "adjectives-feel"}, {"k": "баяу", "e": "slow", "s": "adjectives-feel"}, {"k": "ауыр", "e": "heavy", "s": "adjectives-feel"}, {"k": "жеңіл", "e": "light (weight)", "s": "adjectives-feel"}, {"k": "қатты", "e": "hard", "s": "adjectives-feel"}, {"k": "жұмсақ", "e": "soft", "s": "adjectives-feel"}, {"k": "тегіс", "e": "smooth / flat", "s": "adjectives-feel"}, {"k": "кедір-бұдыр", "e": "rough", "s": "adjectives-feel"}, {"k": "оңай", "e": "easy", "s": "adjectives-feel"}, {"k": "қиын", "e": "difficult", "s": "adjectives-feel"}, {"k": "ыстық", "e": "hot", "s": "adjectives-state"}, {"k": "жылы", "e": "warm", "s": "adjectives-state"}, {"k": "салқын", "e": "cool", "s": "adjectives-state"}, {"k": "суық", "e": "cold", "s": "adjectives-state"}, {"k": "дымқыл", "e": "wet / damp", "s": "adjectives-state"}, {"k": "құрғақ", "e": "dry", "s": "adjectives-state"}, {"k": "жарық", "e": "bright / light", "s": "adjectives-state"}, {"k": "қараңғы", "e": "dark", "s": "adjectives-state"}, {"k": "таза", "e": "clean", "s": "adjectives-state"}, {"k": "лас", "e": "dirty", "s": "adjectives-state"}, {"k": "толы", "e": "full", "s": "adjectives-state"}, {"k": "бос", "e": "empty", "s": "adjectives-state"}, {"k": "ашық", "e": "open", "s": "adjectives-state"}, {"k": "жабық", "e": "closed", "s": "adjectives-state"}, {"k": "жаңа", "e": "new", "s": "adjectives-more"}, {"k": "ескі", "e": "old (things)", "s": "adjectives-more"}, {"k": "жас", "e": "young", "s": "adjectives-more"}, {"k": "кәрі", "e": "old (people)", "s": "adjectives-more"}, {"k": "жаман", "e": "bad", "s": "adjectives-more"}, {"k": "әдемі", "e": "beautiful", "s": "adjectives-more"}, {"k": "қымбат", "e": "expensive", "s": "adjectives-more"}, {"k": "арзан", "e": "cheap", "s": "adjectives-more"}, {"k": "жақын", "e": "near", "s": "adjectives-more"}, {"k": "алыс", "e": "far", "s": "adjectives-more"}, {"k": "бай", "e": "rich", "s": "adjectives-more"}, {"k": "кедей", "e": "poor", "s": "adjectives-more"}, {"k": "күшті", "e": "strong", "s": "adjectives-more"}, {"k": "әлсіз", "e": "weak", "s": "adjectives-more"}, {"k": "дұрыс", "e": "correct", "s": "adjectives-more"}, {"k": "қате", "e": "wrong", "s": "adjectives-more"}, {"k": "көп", "e": "many / much", "s": "adjectives-more"}, {"k": "аз", "e": "few / little", "s": "adjectives-more"}, {"k": "тәтті", "e": "sweet", "s": "adjectives-more"}, {"k": "тұзды", "e": "salty", "s": "adjectives-more"}, {"k": "қышқыл", "e": "sour", "s": "adjectives-more"}, {"k": "ащы", "e": "bitter / spicy", "s": "adjectives-more"}, {"k": "су", "e": "water", "s": "nouns"}, {"k": "нан", "e": "bread", "s": "nouns"}, {"k": "ет", "e": "meat", "s": "nouns"}, {"k": "шай", "e": "tea", "s": "nouns"}, {"k": "сүт", "e": "milk", "s": "nouns"}, {"k": "үй", "e": "house / home", "s": "nouns"}, {"k": "қала", "e": "city", "s": "nouns"}, {"k": "ауыл", "e": "village", "s": "nouns"}, {"k": "жол", "e": "road", "s": "nouns"}, {"k": "күн", "e": "day / sun", "s": "nouns"}, {"k": "түн", "e": "night", "s": "nouns"}, {"k": "жыл", "e": "year", "s": "nouns"}, {"k": "уақыт", "e": "time", "s": "nouns"}, {"k": "ақша", "e": "money", "s": "nouns"}, {"k": "кітап", "e": "book", "s": "nouns"}, {"k": "есік", "e": "door", "s": "nouns"}, {"k": "қызыл", "e": "red", "s": "colors"}, {"k": "көк", "e": "blue / sky-blue", "s": "colors"}, {"k": "жасыл", "e": "green", "s": "colors"}, {"k": "сары", "e": "yellow", "s": "colors"}, {"k": "ақ", "e": "white", "s": "colors"}, {"k": "қара", "e": "black", "s": "colors"}, {"k": "қоңыр", "e": "brown", "s": "colors"}, {"k": "ата", "e": "grandfather", "s": "family"}, {"k": "әже", "e": "grandmother", "s": "family"}, {"k": "ұл", "e": "son / boy", "s": "family"}, {"k": "қыз", "e": "daughter / girl", "s": "family"}, {"k": "қазір", "e": "now", "s": "time"}, {"k": "бүгін", "e": "today", "s": "time"}, {"k": "ертең", "e": "tomorrow", "s": "time"}, {"k": "кеше", "e": "yesterday", "s": "time"}, {"k": "таңертең", "e": "in the morning", "s": "time"}, {"k": "кеш", "e": "evening", "s": "time"}, {"k": "сағат", "e": "hour / clock", "s": "time"}, {"k": "апта", "e": "week", "s": "time"}, {"k": "ай", "e": "month / moon", "s": "time"}, {"k": "дүйсенбі", "e": "Monday", "s": "days"}, {"k": "сейсенбі", "e": "Tuesday", "s": "days"}, {"k": "сәрсенбі", "e": "Wednesday", "s": "days"}, {"k": "бейсенбі", "e": "Thursday", "s": "days"}, {"k": "жұма", "e": "Friday", "s": "days"}, {"k": "сенбі", "e": "Saturday", "s": "days"}, {"k": "жексенбі", "e": "Sunday", "s": "days"}, {"k": "тамақ", "e": "food", "s": "food"}, {"k": "алма", "e": "apple", "s": "food"}, {"k": "картоп", "e": "potato", "s": "food"}, {"k": "күріш", "e": "rice", "s": "food"}, {"k": "қымыз", "e": "kymyz (fermented mare's milk)", "s": "food"}, {"k": "сиыр еті", "e": "beef", "s": "food"}, {"k": "қой еті", "e": "mutton / lamb", "s": "food"}, {"k": "тауық еті", "e": "chicken (meat)", "s": "food"}, {"k": "балық", "e": "fish", "s": "food"}, {"k": "жұмыртқа", "e": "egg", "s": "food"}, {"k": "ірімшік", "e": "cheese", "s": "food"}, {"k": "май", "e": "butter / oil", "s": "food"}, {"k": "тұз", "e": "salt", "s": "food"}, {"k": "қант", "e": "sugar", "s": "food"}, {"k": "сорпа", "e": "soup", "s": "food"}, {"k": "ит", "e": "dog", "s": "animals"}, {"k": "мысық", "e": "cat", "s": "animals"}, {"k": "ат", "e": "horse", "s": "animals"}, {"k": "қой", "e": "sheep", "s": "animals"}, {"k": "сиыр", "e": "cow", "s": "animals"}, {"k": "түйе", "e": "camel", "s": "animals"}, {"k": "құс", "e": "bird", "s": "animals"}, {"k": "тауық", "e": "chicken (the bird)", "s": "animals"}, {"k": "бас", "e": "head", "s": "body"}, {"k": "көз", "e": "eye", "s": "body"}, {"k": "құлақ", "e": "ear", "s": "body"}, {"k": "мұрын", "e": "nose", "s": "body"}, {"k": "ауыз", "e": "mouth", "s": "body"}, {"k": "қол", "e": "hand / arm", "s": "body"}, {"k": "аяқ", "e": "foot / leg", "s": "body"}, {"k": "жүрек", "e": "heart", "s": "body"}, {"k": "тау", "e": "mountain", "s": "nature"}, {"k": "өзен", "e": "river", "s": "nature"}, {"k": "көл", "e": "lake", "s": "nature"}, {"k": "аспан", "e": "sky", "s": "nature"}, {"k": "жер", "e": "earth / land", "s": "nature"}, {"k": "жұлдыз", "e": "star", "s": "nature"}, {"k": "мектеп", "e": "school", "s": "places"}, {"k": "дүкен", "e": "shop", "s": "places"}, {"k": "базар", "e": "market", "s": "places"}, {"k": "қалыңыз қалай", "e": "how are you", "s": "phrases"}, {"k": "қайырлы таң", "e": "good morning", "s": "phrases"}, {"k": "қайырлы кеш", "e": "good evening", "s": "phrases"}, {"k": "қош келдіңіз", "e": "welcome", "s": "phrases"}, {"k": "түсінбедім", "e": "I didn't understand", "s": "phrases"}, {"k": "қанша тұрады", "e": "how much does it cost", "s": "phrases"}];
+
         const STOP = new Set(['to', 'a', 'the', 'of', 'or', 'and', 'in']);
-        const NEXT_DELAY_MS = 1500;
+        const NEXT_DELAY_MS = 1500, DECK_SIZE = 20, MAX_WRONG_PER_CARD = 3;
         const wordEl = document.getElementById('word'), choicesEl = document.getElementById('choices'), countEl = document.getElementById('count');
-        let deck = [], current = null, locked = false, completed = 0;
+        const playEl = document.getElementById('play'), resultEl = document.getElementById('result'), scoreEl = document.getElementById('score');
+        let deckCards = [], deck = [], current = null, locked = false, completed = 0, wrongPicks = 0;
+        const used = new Set();
 
         const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
         const tokens = s => new Set(s.toLowerCase().replace(/\(.*?\)/g, ' ').split(/[^a-z']+/).filter(w => w && !STOP.has(w)));
@@ -61,23 +74,40 @@
 
         // Click-counter style tally: one strip of digits 0-9 per place; changing a digit rolls its strip.
         function showCount() {
-            const text = String(completed).padStart(3, '0');
+            const text = String(completed).padStart(2, '0');
             while (countEl.children.length < text.length) {
                 const cell = document.createElement('span'); cell.className = 'digit';
                 const strip = document.createElement('span'); strip.className = 'digit-strip';
                 for (let d = 0; d < 10; d++) { const n = document.createElement('span'); n.textContent = d; strip.appendChild(n); }
                 cell.appendChild(strip); countEl.insertBefore(cell, countEl.firstChild);
             }
-            [...countEl.children].forEach((cell, i) => {
-                const d = Number(text[i]);
-                cell.firstChild.style.transform = 'translateY(' + (-d * 1.2) + 'em)';
-            });
+            [...countEl.children].forEach((cell, i) => { cell.firstChild.style.transform = 'translateY(' + (-Number(text[i]) * 1.2) + 'em)'; });
             countEl.setAttribute('aria-label', 'Cards completed: ' + completed);
             countEl.classList.remove('tick'); void countEl.offsetWidth; countEl.classList.add('tick');
         }
 
+        function startDeck() {
+            deck = shuffle(deckCards); completed = 0; wrongPicks = 0;
+            resultEl.hidden = true; playEl.hidden = false;
+            showCount(); nextCard();
+        }
+
+        function newDeck() {
+            let fresh = shuffle(CARDS.filter(c => !used.has(c)));
+            if (fresh.length < DECK_SIZE) { used.clear(); fresh = shuffle(CARDS); }
+            deckCards = fresh.slice(0, DECK_SIZE);
+            deckCards.forEach(c => used.add(c));
+            startDeck();
+        }
+
+        // 5 points per card; each wrong pick costs a third of a card (a card can have at most 3 wrong picks).
+        function finishDeck() {
+            scoreEl.textContent = Math.round(100 * (1 - wrongPicks / (deckCards.length * MAX_WRONG_PER_CARD)));
+            playEl.hidden = true; resultEl.hidden = false;
+        }
+
         function nextCard() {
-            if (!deck.length) deck = shuffle(CARDS);
+            if (!deck.length) { finishDeck(); return; }
             current = deck.pop(); locked = false;
             wordEl.textContent = current.k;
             choicesEl.innerHTML = '';
@@ -96,16 +126,17 @@
                 completed++; showCount();
                 setTimeout(nextCard, NEXT_DELAY_MS);
             } else {
-                btn.classList.add('wrong'); btn.disabled = true;
+                wrongPicks++; btn.classList.add('wrong'); btn.disabled = true;
             }
         }
 
         document.addEventListener('keydown', e => {
             const b = choicesEl.querySelector('.choice[data-key="' + e.key + '"]');
-            if (b && !b.disabled) b.click();
+            if (b && !b.disabled && !playEl.hidden) b.click();
         });
-        showCount();
-        nextCard();
+        document.getElementById('repeat').addEventListener('click', startDeck);
+        document.getElementById('fresh').addEventListener('click', newDeck);
+        newDeck();
     </script>
 </body>
 </html>
