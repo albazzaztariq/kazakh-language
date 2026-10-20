@@ -1,64 +1,84 @@
-"""Build verbs.html: a short, example-driven Kazakh verb conjugation page.
+"""Build verbs.html: Kazakh verb endings taught straight from example sentences, in the same style as sentences.html.
 
-Inputs : none (everything is generated from the stems and suffix lists below, so every form on the page is produced by one rule).
-Method : two worked verbs, hard-vowel бару (stem бар-) and soft-vowel келу (stem кел-). Each table row is stem + tense suffix + personal ending,
-         built by code from the HARD/SOFT suffix pairs, so the page cannot disagree with its own rules.
-Output : verbs.html (same CSS/layout as the other lesson pages; no paragraphs, only a one-line subtitle, steps, tables).
+Inputs : none; the sentences below are written by hand (Kazakh | Say it | English), grouped by tense and person.
+Method : a Patterns table (formula -> one worked sentence) followed by one example-sentence table per tense, mixing "me" and "someone else".
+         No explanatory paragraphs. Page uses the same lesson-table markup/CSS as sentences.html.
+Output : verbs.html in the Web Version folder.
 """
 print("[DEBUG] verbs page start", flush=True)
 B = "C:/Users/azt12/OneDrive/Documents/Computing/All Projects/Kazakh Language/Web Version/"
-PERSONS = [("мен", "I"), ("сен", "you (informal)"), ("сіз", "you (polite)"), ("ол", "he / she"), ("біз", "we"),
-           ("сендер", "you all (informal)"), ("сіздер", "you all (polite)"), ("олар", "they")]
-# Each suffix is (hard, soft). Personal-ending sets are listed per person in the order of PERSONS.
-PAST_END = [("м", "м"), ("ң", "ң"), ("ңыз", "ңіз"), ("", ""), ("қ", "к"), ("ңдар", "ңдер"), ("ңыздар", "ңіздер"), ("", "")]
-MYN_END = [("мын", "мін"), ("сың", "сің"), ("сыз", "сіз"), ("", ""), ("мыз", "міз"), ("сыңдар", "сіңдер"), ("сыздар", "сіздер"), ("", "")]
-ADY_END = [("мын", "мін"), ("сың", "сің"), ("сыз", "сіз"), ("ды", "ді"), ("мыз", "міз"), ("сыңдар", "сіңдер"), ("сыздар", "сіздер"), ("ды", "ді")]
-PERF_END = [MYN_END[0], MYN_END[1], MYN_END[2], ("", ""), ("быз", "біз"), MYN_END[5], MYN_END[6], ("", "")]
-VERBS = [("бар", 0, "бару", "go"), ("кел", 1, "келу", "come")]          # (stem, 0 hard / 1 soft, dictionary form, English)
-
-def col(i, build): return [build(VERBS[i][0], VERBS[i][1], p) for p in range(8)]
-def past(s, h, p): return s + ("ды", "ді")[h] + PAST_END[p][h]
-def cont(s, h, p): return s + ("ып", "іп")[h] + " жатыр" + MYN_END[p][0]          # жатыр is a hard word, so its endings are always hard
-def habit(s, h, p): return s + ("а", "е")[h] + ADY_END[p][h]
-def perf(s, h, p): return s + ("ған", "ген")[h] + PERF_END[p][h]
-def npast(s, h, p): return s + ("ма", "ме")[h] + ("ды", "ді")[h] + PAST_END[p][h]
-def npres(s, h, p): return s + ("ма", "ме")[h] + "й" + ADY_END[p][h]
-
-TENSES = [
-    ("Past", "stem + ды/ді + person", past, ["I went", "you went", "you went", "he/she went", "we went", "you all went", "you all went", "they went"]),
-    ("Now (happening right now)", "stem + ып/іп + жатыр + person", cont, ["I am going", "you are going", "you are going", "he/she is going", "we are going", "you all are going", "you all are going", "they are going"]),
-    ("Usually / future", "stem + а/е + person (add ертең, tomorrow, to make it future)", habit, ["I go / will go", "you go / will go", "you go / will go", "he/she goes / will go", "we go / will go", "you all go / will go", "you all go / will go", "they go / will go"]),
-    ("Have done", "stem + ған/ген + person", perf, ["I have gone", "you have gone", "you have gone", "he/she has gone", "we have gone", "you all have gone", "you all have gone", "they have gone"]),
-    ("Not (past)", "stem + ма/ме + ды/ді + person", npast, ["I did not go", "you did not go", "you did not go", "he/she did not go", "we did not go", "you all did not go", "you all did not go", "they did not go"]),
-    ("Not (now / future)", "stem + ма/ме + й + person", npres, ["I do not go", "you do not go", "you do not go", "he/she does not go", "we do not go", "you all do not go", "you all do not go", "they do not go"]),
+PATTERNS = [
+    ("Find the stem: drop -у from the dictionary form", "бару → бар, келу → кел", "to go → bar-, to come → kel-"),
+    ("Past: stem + ды/ді + person", "Мен үйге бардым.", "I went home."),
+    ("Right now: stem + ып/іп + жатыр + person", "Мен үйге барып жатырмын.", "I am going home."),
+    ("Usually / future: stem + а/е + person", "Мен ертең үйге барамын.", "Tomorrow I will go home."),
+    ("Have done: stem + ған/ген + person", "Мен үйге барғанмын.", "I have been home."),
+    ("Not (past): stem + ма/ме + ды/ді + person", "Мен үйге бармадым.", "I did not go home."),
+    ("Not (now / future): stem + ма/ме + й + person", "Мен үйге бармаймын.", "I do not go / will not go home."),
+    ("Command: the bare stem", "Үйге бар!", "Go home!"),
+    ("After қ к п с т ш: ды becomes ты", "кет + ті + м = кеттім", "I left"),
+    ("Stem ends in a vowel: а/е becomes й", "оқы + й + мын = оқимын", "I read"),
+]
+GROUPS = [
+    ("Past: ды / ді", [
+        ("Мен үйге бардым.", "Men üi-ge bar-dym", "I went home."),
+        ("Сен мектепке бардың.", "Sen mek-tep-ke bar-dyñ", "You went to school."),
+        ("Сіз Алматыға бардыңыз.", "Siz Al-ma-ty-gha bar-dyñ-yz", "You went to Almaty (polite)."),
+        ("Ол кеше келді.", "Ol ke-she kel-di", "He / she came yesterday."),
+        ("Біз кеше келдік.", "Biz ke-she kel-dik", "We came yesterday."),
+        ("Сендер кеше келдіңдер ме?", "Sen-der ke-she kel-diñ-der me", "Did you all come yesterday?"),
+        ("Олар кеше келді.", "O-lar ke-she kel-di", "They came yesterday."),
+    ]),
+    ("Right now: ып / іп + жатыр", [
+        ("Мен жұмыс істеп жатырмын.", "Men zhu-mys is-tep zha-tyr-myn", "I am working."),
+        ("Сен не істеп жатырсың?", "Sen ne is-tep zha-tyr-syñ", "What are you doing?"),
+        ("Ол ойнап жатыр.", "Ol oi-nap zha-tyr", "He / she is playing."),
+        ("Біз оқып жатырмыз.", "Biz o-qyp zha-tyr-myz", "We are studying."),
+        ("Олар сөйлесіп жатыр.", "O-lar söi-le-sip zha-tyr", "They are talking."),
+    ]),
+    ("Usually / future: а / е", [
+        ("Мен су ішемін.", "Men su i-she-min", "I drink water."),
+        ("Сен ертең келесің.", "Sen er-teñ ke-le-siñ", "You will come tomorrow."),
+        ("Сіз қазақша сөйлейсіз.", "Siz qa-zaq-sha söi-lei-siz", "You speak Kazakh (polite)."),
+        ("Ол күнде жұмысқа барады.", "Ol kün-de zhu-mys-qa ba-ra-dy", "He / she goes to work every day."),
+        ("Біз ертең келеміз.", "Biz er-teñ ke-le-miz", "We will come tomorrow."),
+        ("Сендер нан жейсіңдер.", "Sen-der nan zhei-siñ-der", "You all eat bread."),
+        ("Олар қалада тұрады.", "O-lar qa-la-da tu-ra-dy", "They live in the city."),
+    ]),
+    ("Have done: ған / ген", [
+        ("Мен Қазақстанға барғанмын.", "Men Qa-zaq-stan-gha bar-ghan-myn", "I have been to Kazakhstan."),
+        ("Сен мұны көргенсің.", "Sen mu-ny kör-gen-siñ", "You have seen this."),
+        ("Ол келген.", "Ol kel-gen", "He / she has come."),
+        ("Олар келген.", "O-lar kel-gen", "They have come."),
+    ]),
+    ("Not: ма / ме", [
+        ("Мен бармадым.", "Men bar-ma-dym", "I did not go."),
+        ("Сен келмедің.", "Sen kel-me-diñ", "You did not come."),
+        ("Ол жұмысқа бармады.", "Ol zhu-mys-qa bar-ma-dy", "He / she did not go to work."),
+        ("Мен су ішпеймін.", "Men su ish-pei-min", "I do not drink water."),
+        ("Біз ертең бармаймыз.", "Biz er-teñ bar-mai-myz", "We will not go tomorrow."),
+        ("Олар келмейді.", "O-lar kel-mei-di", "They are not coming."),
+    ]),
+    ("Commands", [
+        ("Үйге бар!", "Üi-ge bar", "Go home! (informal)"),
+        ("Мұнда кел!", "Mun-da kel", "Come here! (informal)"),
+        ("Қазір келіңіз!", "Qa-zir ke-liñ-iz", "Come now! (polite)"),
+        ("Су ішіңдер!", "Su i-shiñ-der", "Drink water! (you all)"),
+        ("Бірге барайық!", "Bir-ge ba-rai-yq", "Let's go together!"),
+    ]),
 ]
 
-def table(rows, head):
+def table(head, rows, classes):
     t = "<table class=\"lesson-table\"><thead><tr>" + "".join(f"<th>{h}</th>" for h in head) + "</tr></thead><tbody>"
-    for r in rows: t += "<tr>" + "".join(f"<td class=\"c0\">{c}</td>" if i == 0 else f"<td>{c}</td>" for i, c in enumerate(r)) + "</tr>"
+    for r in rows: t += "<tr>" + "".join(f"<td class=\"{classes[i]}\">{c}</td>" for i, c in enumerate(r)) + "</tr>"
     return t + "</tbody></table>"
 
-sections = ""
-for name, formula, fn, eng in TENSES:
-    rows = [(PERSONS[p][0], col(0, fn)[p], col(1, fn)[p], eng[p]) for p in range(8)]
-    sections += f"<section class=\"lesson-section\"><h2>{name}</h2><ul class=\"steps\"><li>{formula}</li></ul>{table(rows, ['Who', 'бару (go)', 'келу (come)', 'English'])}</section>\n"
-CMD = [("сен", "бар", "кел", "go! (informal)"), ("сіз", "барыңыз", "келіңіз", "go! (polite)"), ("сендер", "барыңдар", "келіңдер", "go! (you all)"),
-       ("сіздер", "барыңыздар", "келіңіздер", "go! (you all, polite)"), ("біз", "барайық", "келейік", "let's go")]
-sections += f"<section class=\"lesson-section\"><h2>Commands</h2><ul class=\"steps\"><li>informal: bare stem &middot; polite: stem + ыңыз/іңіз &middot; let's: stem + айық/ейік</li></ul>{table(CMD, ['Who', 'бару (go)', 'келу (come)', 'English'])}</section>\n"
+body = f"<section class=\"lesson-section\"><h2>Patterns</h2>{table(['Pattern', 'Example', 'English'], PATTERNS, ['c0', 'c1', 'c2'])}</section>\n"
+for name, rows in GROUPS:
+    body += f"        <section class=\"lesson-section\"><h2>{name}</h2>{table(['Kazakh', 'Say it', 'English'], rows, ['c0', 'c1', 'c2'])}</section>\n"
 
-steps = f"""<section class="lesson-section"><h2>How to build any verb form</h2><ul class="steps">
-<li>1. Take the dictionary form and drop -у: <strong>бару</strong> &rarr; <strong>бар</strong>, <strong>келу</strong> &rarr; <strong>кел</strong></li>
-<li>2. Add the tense suffix: hard vowels (а, о, ы, ұ) use а/ды/ған, soft vowels (ә, е, і, ү, ө) use е/ді/ген</li>
-<li>3. Add the person ending: -м (I), -ң (you), -ңыз (polite), nothing (he/she/they)</li>
-<li>I went: бар + ды + м = <strong>бардым</strong></li>
-<li>We came: кел + ді + к = <strong>келдік</strong></li>
-<li>I do not go: бар + ма + й + мын = <strong>бармаймын</strong></li>
-<li>Voiceless ending (қ к п с т ш ч ц щ ф х һ): ды becomes ты: кет + ті + м = <strong>кеттім</strong> (I left)</li>
-<li>Stem ends in a vowel: а/е becomes й: оқы + й + мын = <strong>оқимын</strong> (I read), сөйле + й + мін = <strong>сөйлеймін</strong> (I speak)</li>
-</ul></section>
-"""
-title = "Kazakh Verb Conjugation - Past, Present, Future, Negative"
-desc = "Kazakh verb conjugation made simple: past, present, future, have done, negative and commands, with every person worked through on two example verbs."
+title = "Kazakh Verb Conjugation with Example Sentences"
+desc = "Learn Kazakh verb endings from example sentences: past, present, future, have done, negative and commands, for I, you, he, we and they."
 html = f"""<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -75,14 +95,13 @@ html = f"""<!DOCTYPE html>
         <a href="index.html" class="back-link">&larr; Back to Home</a>
 
         <header>
-            <h1 class="section-title">Verb Conjugation</h1>
-            <p class="section-subtitle">stem + tense + person, worked through on бару (go) and келу (come)</p>
+            <h1 class="section-title">Verbs</h1>
+            <p class="section-subtitle">Verb endings, learned from examples</p>
         </header>
 
         <div class="divider"></div>
 
-        {steps}
-        {sections}
+        {body}
         <div class="page-nav">
             <a href="sentences.html" class="btn">&larr;</a>
             <a href="index.html" class="btn">Home</a>
