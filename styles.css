@@ -538,11 +538,66 @@ html {
     margin: 0 auto 10px;
 }
 
-.game-status {
-    margin: 0 0 18px;
+.tally {
+    margin: 0 0 22px;
     text-align: center;
-    font-size: 0.85rem;
-    color: rgba(255, 255, 255, 0.75);
+}
+
+.tally-label {
+    display: block;
+    margin-bottom: 8px;
+    font-size: 1.05rem;
+    font-weight: 700;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: #FFE44D;
+    text-shadow: 0 0 10px rgba(255, 228, 77, 0.55);
+}
+
+.tally-digits {
+    display: inline-flex;
+    gap: 4px;
+    padding: 6px 8px;
+    font-size: 2.4rem;
+    font-weight: 700;
+    background: #1a1a2e;
+    border: 3px solid #DAA520;
+    border-radius: 10px;
+    box-shadow: inset 0 0 12px rgba(0, 0, 0, 0.7), 0 4px 14px rgba(0, 0, 0, 0.3);
+}
+
+.tally-digits.tick {
+    animation: tally-tick 0.35s ease-out;
+}
+
+@keyframes tally-tick {
+    0% { transform: scale(1); }
+    30% { transform: scale(1.12); }
+    100% { transform: scale(1); }
+}
+
+.digit {
+    display: inline-block;
+    width: 0.75em;
+    height: 1.2em;
+    overflow: hidden;
+    color: #FFE44D;
+    text-shadow: 0 0 8px rgba(255, 228, 77, 0.7);
+    background: linear-gradient(#0e0e1c, #26263f 50%, #0e0e1c);
+    border-radius: 4px;
+}
+
+.digit-strip {
+    display: flex;
+    flex-direction: column;
+    text-align: center;
+    line-height: 1.2em;
+    transition: transform 0.45s cubic-bezier(0.3, 1.35, 0.5, 1);
+}
+
+.digit-strip span {
+    display: block;
+    height: 1.2em;
 }
 
 .game-word {
@@ -598,5 +653,6 @@ html {
 
 @media (max-width: 480px) {
     .game-word { font-size: 2rem; padding: 22px 10px; }
+    .tally-digits { font-size: 2rem; }
     .choice { font-size: 1rem; padding: 15px 10px; }
 }

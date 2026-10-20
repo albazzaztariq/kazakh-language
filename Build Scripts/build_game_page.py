@@ -3,8 +3,8 @@
 Inputs : common-words.html (every table row: Kazakh word, English meaning, topic section), read at build time so the game always matches the page.
 Method : the page embeds the cards as JSON. Each round shows one Kazakh word (no pronunciation line) and four English choices: the right one plus three
          distractors, preferring the same topic and never sharing a meaningful word with the right answer (so "thin" never competes with "thin / slender").
-         A wrong pick turns red and stays red; picking more wrong ones turns them red too; the right pick turns green, everything locks for 3 seconds,
-         then the next card appears. Cards come in a shuffled order and the deck reshuffles when it runs out. Keys 1-4 also pick a choice.
+         A wrong pick turns red and stays red; picking more wrong ones turns them red too; the right pick turns green, everything locks for 1.5 seconds,
+         then the next card appears. The top shows a rolling click-counter style tally, "Cards Completed", that goes up on every right answer. Cards come in a shuffled order and the deck reshuffles when it runs out. Keys 1-4 also pick a choice.
 Output : game.html (styles live in styles.css under "Word game").
 """
 import re, json, html
@@ -25,7 +25,7 @@ page = """<!DOCTYPE html>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>%(title)s</title>
-    <link rel="stylesheet" href="styles.css?v=5">
+    <link rel="stylesheet" href="styles.css?v=6">
     <meta name="description" content="%(desc)s">
     <link rel="canonical" href="https://albazzaztariq.github.io/kazakh-language/game.html">
     <meta name="theme-color" content="#00AFCA">
@@ -42,7 +42,10 @@ page = """<!DOCTYPE html>
         <div class="divider"></div>
 
         <div class="game">
-            <p class="game-status" id="status" aria-live="polite"></p>
+            <div class="tally" aria-live="polite">
+                <span class="tally-label">Cards Completed</span>
+                <div class="tally-digits" id="count" aria-label="Cards completed: 0"></div>
+            </div>
             <div class="game-word" id="word" lang="kk"></div>
             <div class="game-choices" id="choices"></div>
         </div>
@@ -60,9 +63,9 @@ page = """<!DOCTYPE html>
     <script>
         const CARDS = %(cards)s;
         const STOP = new Set(['to', 'a', 'the', 'of', 'or', 'and', 'in']);
-        const NEXT_DELAY_MS = 3000;
-        const wordEl = document.getElementById('word'), choicesEl = document.getElementById('choices'), statusEl = document.getElementById('status');
-        let deck = [], current = null, locked = false, wrongThisCard = 0, seen = 0, firstTry = 0;
+        const NEXT_DELAY_MS = 1500;
+        const wordEl = document.getElementById('word'), choicesEl = document.getElementById('choices'), countEl = document.getElementById('count');
+        let deck = [], current = null, locked = false, completed = 0;
 
         const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
         const tokens = s => new Set(s.toLowerCase().replace(/\\(.*?\\)/g, ' ').split(/[^a-z']+/).filter(w => w && !STOP.has(w)));
@@ -77,9 +80,26 @@ page = """<!DOCTYPE html>
             return shuffle([card, ...chosen]);
         }
 
+        // Click-counter style tally: one strip of digits 0-9 per place; changing a digit rolls its strip.
+        function showCount() {
+            const text = String(completed).padStart(3, '0');
+            while (countEl.children.length < text.length) {
+                const cell = document.createElement('span'); cell.className = 'digit';
+                const strip = document.createElement('span'); strip.className = 'digit-strip';
+                for (let d = 0; d < 10; d++) { const n = document.createElement('span'); n.textContent = d; strip.appendChild(n); }
+                cell.appendChild(strip); countEl.insertBefore(cell, countEl.firstChild);
+            }
+            [...countEl.children].forEach((cell, i) => {
+                const d = Number(text[i]);
+                cell.firstChild.style.transform = 'translateY(' + (-d * 1.2) + 'em)';
+            });
+            countEl.setAttribute('aria-label', 'Cards completed: ' + completed);
+            countEl.classList.remove('tick'); void countEl.offsetWidth; countEl.classList.add('tick');
+        }
+
         function nextCard() {
             if (!deck.length) deck = shuffle(CARDS);
-            current = deck.pop(); locked = false; wrongThisCard = 0; seen++;
+            current = deck.pop(); locked = false;
             wordEl.textContent = current.k;
             choicesEl.innerHTML = '';
             pickChoices(current).forEach((c, i) => {
@@ -88,18 +108,16 @@ page = """<!DOCTYPE html>
                 b.addEventListener('click', () => answer(b, c));
                 choicesEl.appendChild(b);
             });
-            statusEl.textContent = 'Card ' + seen + ' \\u00b7 first try: ' + firstTry + ' of ' + (seen - 1);
         }
 
         function answer(btn, card) {
             if (locked || btn.classList.contains('wrong')) return;
             if (card === current) {
                 locked = true; btn.classList.add('correct');
-                if (wrongThisCard === 0) firstTry++;
-                statusEl.textContent = 'Card ' + seen + ' \\u00b7 first try: ' + firstTry + ' of ' + seen;
+                completed++; showCount();
                 setTimeout(nextCard, NEXT_DELAY_MS);
             } else {
-                wrongThisCard++; btn.classList.add('wrong'); btn.disabled = true;
+                btn.classList.add('wrong'); btn.disabled = true;
             }
         }
 
@@ -107,6 +125,7 @@ page = """<!DOCTYPE html>
             const b = choicesEl.querySelector('.choice[data-key="' + e.key + '"]');
             if (b && !b.disabled) b.click();
         });
+        showCount();
         nextCard();
     </script>
 </body>
