@@ -3,18 +3,17 @@
 Inputs : common-words.html (every table row: Kazakh word, English meaning, topic section), read at build time so the game always matches the page.
 Flow   : 1) Setup screen. "Question Word Displayed in:" with Kazakh / English buttons (one is always selected), then "Select One or More Groups of
             Vocabulary to Review" over toggle buttons (one per topic group; the four adjective sections form one "Adjectives" group). Below them a
-            distinct "Any" button: when on, groups are locked off and a card-count slider + text field appears (5 to 50; typing 4 or less shows
+            distinct "Any" button: when on, groups are locked off. A card-count slider + text field is always shown (5 to 50; typing 4 or less shows
             "5 Card Minimum" and snaps to 5 on leaving the field, typing over 50 shows "50 Card Maximum" and clamps to 50). A green "Go" starts.
-         2) Play. A group deck is every word in the selected groups; an Any deck is N random words, avoiding words used in earlier Any decks until the
-            vocabulary runs out. Kazakh mode shows the Kazakh word (speaker button plays its clip, nothing autoplays) and four English choices; English
+         2) Play. A deck is N random words from the selected groups (or from all words for Any); if the selected groups hold fewer than N words the
+            deck uses all of them and a note says so. New decks avoid words already dealt from the same selection until it runs out. Kazakh mode shows the Kazakh word (speaker button plays its clip, nothing autoplays) and four English choices; English
             mode shows the English meaning and four Kazakh choices (no speaker, it would give the answer away).
             The wrong choices always come from the question's own group (an adjective question only gets adjective choices); only when a group is too
             small (Places has 3 words) they may also come from the other noun groups, and only as a last resort from anywhere. Choices never share a
             meaningful English word with the right answer. A wrong pick turns red and stays red; the right pick turns green, everything locks for
             1.5 seconds, then the next card appears. A rolling click-counter shows "Cards Completed" = unique cards ever completed this visit; it
             only animates when the number actually changes.
-         3) Results (score only here). Score = 100 x (1 - wrong picks / (cards x 3)). Buttons: Repeat This Deck, Generate New Deck (Any mode only),
-            Change Groups.
+         3) Results (score only here). Score = 100 x (1 - wrong picks / (cards x 3)). Buttons: Repeat This Deck, Generate New Deck, Change Groups.
 Keys 1-4 also pick a choice. Output: game.html (styles live in styles.css under "Word game").
 """
 import re, json, html, os
@@ -41,9 +40,9 @@ JS = r"""
         const $ = id => document.getElementById(id);
         const setupEl = $('setup'), roundEl = $('round'), groupsEl = $('groups'), anyBtn = $('anyBtn'), goBtn = $('go'), sizeBox = $('sizeBox');
         const wordEl = $('word'), choicesEl = $('choices'), countEl = $('count'), playEl = $('play'), resultEl = $('result'), scoreEl = $('score');
-        const rangeEl = $('sizeRange'), numEl = $('sizeNum'), msgEl = $('sizeMsg'), freshBtn = $('fresh'), speakEl = $('speak');
+        const rangeEl = $('sizeRange'), numEl = $('sizeNum'), msgEl = $('sizeMsg'), noteEl = $('sizeNote'), freshBtn = $('fresh'), speakEl = $('speak');
         const langKk = $('langKk'), langEn = $('langEn');
-        let deckCards = [], deck = [], current = null, locked = false, wrongPicks = 0, deckSize = 20, anyMode = false, anySelected = false, nextTimer = null;
+        let deckCards = [], deck = [], current = null, locked = false, wrongPicks = 0, deckSize = 20, anySelected = false, nextTimer = null;
         let lang = 'kk';                   // language of the question: 'kk' = Kazakh word shown, English choices; 'en' = English shown, Kazakh choices
         const selected = new Set();        // chosen group names
         const used = new Set();            // cards already dealt in an Any deck (new Any decks avoid them until the vocabulary runs out)
@@ -75,14 +74,19 @@ JS = r"""
                 b.disabled = anySelected;
             });
             anyBtn.setAttribute('aria-pressed', anySelected ? 'true' : 'false');
-            sizeBox.hidden = !anySelected;                       // the card-count slider only exists in Any mode
+            updateNote();
             goBtn.disabled = !(anySelected || selected.size > 0);
         }
         anyBtn.addEventListener('click', () => { anySelected = !anySelected; if (anySelected) selected.clear(); refreshSetup(); });
 
-        // ---- card-count slider + text field (Any mode), limits 5 to 50 ----
+        // ---- card-count slider + text field (every deck), limits 5 to 50 ----
         const showMsg = text => { msgEl.textContent = text; };
-        function setSize(n) { deckSize = n; rangeEl.value = n; numEl.value = n; }
+        function poolSize() { return anySelected ? CARDS.length : CARDS.filter(c => selected.has(c.g)).length; }
+        function updateNote() {                                  // a small selection cannot fill a big deck: say so before Go
+            const n = poolSize();
+            noteEl.textContent = (n > 0 && n < deckSize) ? 'Your selection has only ' + n + (n === 1 ? ' word' : ' words') + ', so the deck will use all ' + n + '.' : '';
+        }
+        function setSize(n) { deckSize = n; rangeEl.value = n; numEl.value = n; updateNote(); }
         rangeEl.addEventListener('input', () => { setSize(Number(rangeEl.value)); showMsg(''); });
         numEl.addEventListener('input', () => {
             numEl.value = numEl.value.replace(/[^0-9]/g, '').slice(0, 3);
@@ -90,7 +94,7 @@ JS = r"""
             const n = Number(numEl.value);
             if (n > MAX_SIZE) { setSize(MAX_SIZE); showMsg(MAX_SIZE + ' Card Maximum'); }
             else if (n < MIN_SIZE) { showMsg(MIN_SIZE + ' Card Minimum'); }      // not applied; the field snaps back when you leave it
-            else { deckSize = n; rangeEl.value = n; showMsg(''); }
+            else { deckSize = n; rangeEl.value = n; showMsg(''); updateNote(); }
         });
         function settleSize() {                                  // called when leaving the field and on Go
             if (numEl.value === '') { numEl.value = deckSize; showMsg(''); return; }
@@ -132,15 +136,19 @@ JS = r"""
         // Repeating a deck keeps the counter where it is: it only counts cards never completed before.
         function startDeck() {
             deck = shuffle(deckCards); wrongPicks = 0;
-            resultEl.hidden = true; playEl.hidden = false; freshBtn.hidden = !anyMode;
+            resultEl.hidden = true; playEl.hidden = false;
             speakEl.hidden = lang !== 'kk';                      // an English question has no audio (it would give the answer away)
             nextCard();
         }
 
-        function newAnyDeck() {
-            let fresh = shuffle(CARDS.filter(c => !used.has(c)));
-            if (fresh.length < deckSize) { used.clear(); fresh = shuffle(CARDS); }
-            deckCards = fresh.slice(0, deckSize);
+        // A deck is deckSize random words from the selected groups (or from everything for Any); a selection smaller than deckSize uses all its words.
+        // New decks avoid words already dealt from the same selection until that selection runs out.
+        let pool = CARDS;
+        function newDeck() {
+            const take = Math.min(deckSize, pool.length);
+            let fresh = shuffle(pool.filter(c => !used.has(c)));
+            if (fresh.length < take) { pool.forEach(c => used.delete(c)); fresh = shuffle(pool); }
+            deckCards = fresh.slice(0, take);
             deckCards.forEach(c => used.add(c));
             startDeck();
         }
@@ -198,14 +206,13 @@ JS = r"""
 
         goBtn.addEventListener('click', () => {
             if (goBtn.disabled) return;
-            if (anySelected) { settleSize(); anyMode = true; newAnyDeck(); }
-            else { anyMode = false; deckCards = CARDS.filter(c => selected.has(c.g)); startDeck(); }
+            settleSize(); pool = anySelected ? CARDS : CARDS.filter(c => selected.has(c.g)); newDeck();
             setupEl.hidden = true; roundEl.hidden = false;
         });
         $('back').addEventListener('click', backToSetup);
         $('change').addEventListener('click', backToSetup);
         $('repeat').addEventListener('click', startDeck);
-        freshBtn.addEventListener('click', newAnyDeck);
+        freshBtn.addEventListener('click', newDeck);
 
         document.addEventListener('keydown', e => {
             if (e.target.tagName === 'INPUT' || roundEl.hidden || playEl.hidden) return;   // typing a deck size must not answer cards
@@ -223,7 +230,7 @@ page = """<!DOCTYPE html>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>%(title)s</title>
-    <link rel="stylesheet" href="styles.css?v=11">
+    <link rel="stylesheet" href="styles.css?v=12">
     <meta name="description" content="%(desc)s">
     <link rel="canonical" href="https://albazzaztariq.github.io/kazakh-language/game.html">
     <meta name="theme-color" content="#00AFCA">
@@ -249,13 +256,14 @@ page = """<!DOCTYPE html>
                 <div class="setup-title setup-title-groups">Select One or More Groups of Vocabulary to Review</div>
                 <div class="group-grid" id="groups"></div>
                 <button type="button" class="any-btn" id="anyBtn" aria-pressed="false">Any</button>
-                <div class="deck-size" id="sizeBox" hidden>
+                <div class="deck-size" id="sizeBox">
                     <label class="deck-size-label" for="sizeNum">Cards per deck</label>
                     <div class="deck-size-row">
                         <input type="range" id="sizeRange" min="5" max="50" step="1" value="20" aria-label="Cards per deck, slider">
                         <input type="text" id="sizeNum" inputmode="numeric" autocomplete="off" maxlength="3" value="20" aria-describedby="sizeMsg">
                     </div>
                     <div class="deck-size-msg" id="sizeMsg" role="alert"></div>
+                    <div class="deck-size-note" id="sizeNote"></div>
                 </div>
                 <button type="button" class="go-btn" id="go" disabled>Go</button>
             </div>
