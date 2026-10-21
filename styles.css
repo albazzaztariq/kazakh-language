@@ -954,21 +954,6 @@ html {
     gap: 16px;
 }
 
-.nav-rows .btn-verbgame {
-    width: 340px;
-    max-width: 100%;
-    padding-top: 18px;
-    padding-bottom: 18px;
-    color: #FFE44D;
-    background: #1a1a2e;
-    border: 4px double #FFD700;
-    box-shadow: 0 6px 18px rgba(26, 26, 46, 0.5);
-}
-
-.nav-rows .btn-verbgame:hover {
-    background: #2b2b4d;
-    box-shadow: 0 9px 24px rgba(26, 26, 46, 0.65);
-}
 
 /* ---- Verb game (verb-game.html) ---- */
 .vg-task {
