@@ -925,3 +925,142 @@ html {
     background: linear-gradient(135deg, #FF9D68, #F05A3B, #D9462B);
     box-shadow: 0 9px 26px rgba(232, 71, 43, 0.6);
 }
+
+/* ---- Common Words Test: language choice, long English questions ---- */
+.lang-row {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    margin-bottom: 4px;
+}
+
+.lang-btn {
+    min-height: 52px;
+    font-weight: 700;
+}
+
+.setup-title-groups {
+    margin-top: 26px;
+}
+
+.game-word.long {
+    font-size: 1.7rem;
+}
+
+/* ---- Home page: Games section ---- */
+.nav-buttons-stack {
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+}
+
+.nav-rows .btn-verbgame {
+    width: 340px;
+    max-width: 100%;
+    padding-top: 18px;
+    padding-bottom: 18px;
+    color: #FFE44D;
+    background: #1a1a2e;
+    border: 4px double #FFD700;
+    box-shadow: 0 6px 18px rgba(26, 26, 46, 0.5);
+}
+
+.nav-rows .btn-verbgame:hover {
+    background: #2b2b4d;
+    box-shadow: 0 9px 24px rgba(26, 26, 46, 0.65);
+}
+
+/* ---- Verb game (verb-game.html) ---- */
+.vg-task {
+    margin: 0 0 16px;
+    padding: 14px 12px;
+    text-align: center;
+    font-size: 1.2rem;
+    font-weight: 700;
+    line-height: 1.35;
+    color: #FFD700;
+    background: rgba(255, 255, 255, 0.12);
+    border: 2px solid rgba(255, 215, 0, 0.4);
+    border-radius: 14px;
+}
+
+.vg-steps {
+    margin: 0 0 8px;
+}
+
+.vg-card {
+    margin: 0 0 12px;
+    padding: 12px 14px;
+    background: rgba(255, 255, 255, 0.14);
+    border-left: 4px solid #FFD700;
+    border-radius: 10px;
+}
+
+.vg-card-title {
+    font-size: 0.8rem;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.vg-card-answer {
+    margin: 4px 0;
+    font-size: 1.7rem;
+    font-weight: 700;
+    color: #FFE44D;
+}
+
+.vg-card-why {
+    font-size: 0.95rem;
+    color: rgba(255, 255, 255, 0.92);
+}
+
+.vg-next {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    margin: 16px 0 0;
+    padding-left: 0;
+    padding-right: 0;
+    text-align: center;
+}
+
+.vg-built {
+    min-height: 1.5em;
+    margin: 0 0 14px;
+    text-align: center;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #ffffff;
+}
+
+.vg-final {
+    margin: 6px 0 12px;
+    text-align: center;
+    font-size: 2.6rem;
+    font-weight: 700;
+    color: #FFE44D;
+    text-shadow: 0 0 16px rgba(255, 228, 77, 0.6);
+}
+
+.vg-step-title {
+    margin: 0 0 12px;
+    text-align: center;
+    font-weight: 700;
+    line-height: 1.3;
+    color: #FFE44D;
+}
+
+.vg-why {
+    min-height: 1.4em;
+    margin-top: 14px;
+    text-align: center;
+    font-size: 0.98rem;
+    color: rgba(255, 255, 255, 0.95);
+}
+
+@media (max-width: 480px) {
+    .vg-final { font-size: 2rem; }
+    .vg-built { font-size: 1.25rem; }
+    .vg-task { font-size: 1.05rem; }
+}

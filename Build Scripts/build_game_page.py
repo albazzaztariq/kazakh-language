@@ -1,17 +1,20 @@
-"""Build game.html: a flash-card word game for the Common Words vocabulary, with a group-selection screen, scored out of 100.
+"""Build game.html (the "Common Words Test"): flash cards for the Common Words vocabulary, in either direction, with group selection, scored out of 100.
 
 Inputs : common-words.html (every table row: Kazakh word, English meaning, topic section), read at build time so the game always matches the page.
-Flow   : 1) Setup screen. "Select One or More Groups of Vocabulary to Review" over toggle buttons (one per topic group; the four adjective sections
-            form one "Adjectives" group). Below them a distinct "Any" button: when on, groups are locked off and a card-count slider + text field
-            appears (5 to 50; typing 4 or less shows "5 Card Minimum" and snaps to 5 on leaving the field, typing over 50 shows "50 Card Maximum" and
-            clamps to 50). A green "Go" button starts once something is selected.
+Flow   : 1) Setup screen. "Question Word Displayed in:" with Kazakh / English buttons (one is always selected), then "Select One or More Groups of
+            Vocabulary to Review" over toggle buttons (one per topic group; the four adjective sections form one "Adjectives" group). Below them a
+            distinct "Any" button: when on, groups are locked off and a card-count slider + text field appears (5 to 50; typing 4 or less shows
+            "5 Card Minimum" and snaps to 5 on leaving the field, typing over 50 shows "50 Card Maximum" and clamps to 50). A green "Go" starts.
          2) Play. A group deck is every word in the selected groups; an Any deck is N random words, avoiding words used in earlier Any decks until the
-            vocabulary runs out. Each card shows one Kazakh word (speaker button plays its clip, nothing autoplays) and four English choices: the right one
-            plus three distractors, preferring the same group and never sharing a meaningful word with the right answer. A wrong pick turns red and stays red
-            (more wrong picks turn red too); the right pick turns green, everything locks for 1.5 seconds, then the next card appears. A rolling click-counter
-            shows "Cards Completed" = unique cards ever completed this visit, so repeating a deck does not raise it.
-         3) Results (score only here). Score = 100 x (1 - wrong picks / (cards x 3)): every card is worth 100/cards points and each of its three possible
-            wrong picks costs a third of that. Buttons: Repeat This Deck, Generate New Deck (Any mode only), Change Groups.
+            vocabulary runs out. Kazakh mode shows the Kazakh word (speaker button plays its clip, nothing autoplays) and four English choices; English
+            mode shows the English meaning and four Kazakh choices (no speaker, it would give the answer away).
+            The wrong choices always come from the question's own group (an adjective question only gets adjective choices); only when a group is too
+            small (Places has 3 words) they may also come from the other noun groups, and only as a last resort from anywhere. Choices never share a
+            meaningful English word with the right answer. A wrong pick turns red and stays red; the right pick turns green, everything locks for
+            1.5 seconds, then the next card appears. A rolling click-counter shows "Cards Completed" = unique cards ever completed this visit; it
+            only animates when the number actually changes.
+         3) Results (score only here). Score = 100 x (1 - wrong picks / (cards x 3)). Buttons: Repeat This Deck, Generate New Deck (Any mode only),
+            Change Groups.
 Keys 1-4 also pick a choice. Output: game.html (styles live in styles.css under "Word game").
 """
 import re, json, html, os
@@ -33,11 +36,15 @@ assert not missing, f"no audio clip for {missing}"   # the speaker button loads 
 JS = r"""
         const STOP = new Set(['to', 'a', 'the', 'of', 'or', 'and', 'in']);
         const NEXT_DELAY_MS = 1500, MIN_SIZE = 5, MAX_SIZE = 50, MAX_WRONG_PER_CARD = 3;
+        // Groups whose words are all nouns: a tiny noun group (Places has 3 words) may borrow wrong choices from the other noun groups.
+        const NOUN_GROUPS = new Set(['People', 'Everyday Nouns', 'Family', 'Food', 'Animals', 'Body', 'Nature', 'Places', 'Days of the Week', 'Time']);
         const $ = id => document.getElementById(id);
         const setupEl = $('setup'), roundEl = $('round'), groupsEl = $('groups'), anyBtn = $('anyBtn'), goBtn = $('go'), sizeBox = $('sizeBox');
         const wordEl = $('word'), choicesEl = $('choices'), countEl = $('count'), playEl = $('play'), resultEl = $('result'), scoreEl = $('score');
-        const rangeEl = $('sizeRange'), numEl = $('sizeNum'), msgEl = $('sizeMsg'), freshBtn = $('fresh');
+        const rangeEl = $('sizeRange'), numEl = $('sizeNum'), msgEl = $('sizeMsg'), freshBtn = $('fresh'), speakEl = $('speak');
+        const langKk = $('langKk'), langEn = $('langEn');
         let deckCards = [], deck = [], current = null, locked = false, wrongPicks = 0, deckSize = 20, anyMode = false, anySelected = false, nextTimer = null;
+        let lang = 'kk';                   // language of the question: 'kk' = Kazakh word shown, English choices; 'en' = English shown, Kazakh choices
         const selected = new Set();        // chosen group names
         const used = new Set();            // cards already dealt in an Any deck (new Any decks avoid them until the vocabulary runs out)
         const completedCards = new Set();  // every unique card answered correctly this visit; the counter shows its size
@@ -47,6 +54,14 @@ JS = r"""
         const clash = (a, b) => a.e.toLowerCase() === b.e.toLowerCase() || [...tokens(a.e)].some(t => tokens(b.e).has(t));
 
         // ---- setup screen ----
+        function setLang(l) {
+            lang = l;
+            langKk.setAttribute('aria-pressed', l === 'kk' ? 'true' : 'false');
+            langEn.setAttribute('aria-pressed', l === 'en' ? 'true' : 'false');
+        }
+        langKk.addEventListener('click', () => setLang('kk'));
+        langEn.addEventListener('click', () => setLang('en'));
+
         const GROUP_NAMES = [...new Set(CARDS.map(c => c.g))];
         GROUP_NAMES.forEach(name => {
             const b = document.createElement('button');
@@ -86,18 +101,22 @@ JS = r"""
         numEl.addEventListener('keydown', e => { if (e.key === 'Enter') numEl.blur(); });
 
         // ---- play ----
+        // Wrong choices: same group first, then (noun groups only) the other noun groups, then anywhere as a last resort; never a clash with the answer.
         function pickChoices(card) {
-            const others = shuffle(CARDS.filter(c => c !== card && !clash(card, c)));
+            const ok = c => c !== card && !clash(card, c);
             const chosen = [];
-            const take = list => { for (const c of list) { if (chosen.length >= 3) break; if (!chosen.some(x => clash(x, c))) chosen.push(c); } };
-            take(others.filter(c => c.g === card.g).slice(0, 2));
-            take(others);
+            const take = list => { for (const c of shuffle(list)) { if (chosen.length >= 3) break; if (!chosen.some(x => clash(x, c))) chosen.push(c); } };
+            take(CARDS.filter(c => ok(c) && c.g === card.g));
+            if (chosen.length < 3 && NOUN_GROUPS.has(card.g)) take(CARDS.filter(c => ok(c) && c.g !== card.g && NOUN_GROUPS.has(c.g)));
+            if (chosen.length < 3) take(CARDS.filter(c => ok(c)));
             return shuffle([card, ...chosen]);
         }
 
-        // Click-counter style tally: one strip of digits 0-9 per place; changing a digit rolls its strip.
+        // Click-counter style tally: one strip of digits 0-9 per place; changing a digit rolls its strip. It only animates when the number changes.
+        let shownText = null;
         function showCount() {
             const text = String(completedCards.size).padStart(3, '0');
+            if (text === shownText) return;
             while (countEl.children.length < text.length) {
                 const cell = document.createElement('span'); cell.className = 'digit';
                 const strip = document.createElement('span'); strip.className = 'digit-strip';
@@ -106,13 +125,15 @@ JS = r"""
             }
             [...countEl.children].forEach((cell, i) => { cell.firstChild.style.transform = 'translateY(' + (-Number(text[i]) * 1.2) + 'em)'; });
             countEl.setAttribute('aria-label', 'Cards completed: ' + completedCards.size);
-            countEl.classList.remove('tick'); void countEl.offsetWidth; countEl.classList.add('tick');
+            if (shownText !== null) { countEl.classList.remove('tick'); void countEl.offsetWidth; countEl.classList.add('tick'); }
+            shownText = text;
         }
 
         // Repeating a deck keeps the counter where it is: it only counts cards never completed before.
         function startDeck() {
             deck = shuffle(deckCards); wrongPicks = 0;
             resultEl.hidden = true; playEl.hidden = false; freshBtn.hidden = !anyMode;
+            speakEl.hidden = lang !== 'kk';                      // an English question has no audio (it would give the answer away)
             nextCard();
         }
 
@@ -131,7 +152,6 @@ JS = r"""
         }
 
         // Speaker button: plays the word's clip from Common Words/Words Audio/ (file name = the word's code points in hex). Never plays by itself.
-        const speakEl = $('speak');
         let audio = null;
         const clipUrl = w => 'Common%20Words/Words%20Audio/' + [...w].map(c => c.codePointAt(0).toString(16)).join('-') + '.mp3';
         function stopAudio() { if (audio) { audio.pause(); audio = null; } speakEl.classList.remove('playing'); }
@@ -148,11 +168,13 @@ JS = r"""
             stopAudio();
             if (!deck.length) { finishDeck(); return; }
             current = deck.pop(); locked = false;
-            wordEl.textContent = current.k;
+            const question = lang === 'kk' ? current.k : current.e;
+            wordEl.textContent = question; wordEl.lang = lang === 'kk' ? 'kk' : 'en';
+            wordEl.parentElement.classList.toggle('long', question.length > 16);
             choicesEl.innerHTML = '';
             pickChoices(current).forEach((c, i) => {
                 const b = document.createElement('button');
-                b.type = 'button'; b.className = 'choice'; b.textContent = c.e; b.dataset.key = i + 1;
+                b.type = 'button'; b.className = 'choice'; b.textContent = lang === 'kk' ? c.e : c.k; b.dataset.key = i + 1;
                 b.addEventListener('click', () => answer(b, c));
                 choicesEl.appendChild(b);
             });
@@ -162,7 +184,7 @@ JS = r"""
             if (locked || btn.classList.contains('wrong')) return;
             if (card === current) {
                 locked = true; btn.classList.add('correct');
-                completedCards.add(current); showCount();
+                completedCards.add(current); showCount();          // showCount ignores a card that was already counted
                 nextTimer = setTimeout(nextCard, NEXT_DELAY_MS);
             } else {
                 wrongPicks++; btn.classList.add('wrong'); btn.disabled = true;
@@ -193,15 +215,15 @@ JS = r"""
         showCount(); refreshSetup();
 """
 
-title = "Kazakh Word Game: Flash Cards for Common Words"
-desc = "Practice common Kazakh words with a flash-card game: choose vocabulary groups, see the word, pick the English meaning from four choices."
+title = "Kazakh Common Words Test: Flash Cards"
+desc = "Test yourself on common Kazakh words: choose vocabulary groups, see the word in Kazakh or English, and pick the right meaning from four choices."
 page = """<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>%(title)s</title>
-    <link rel="stylesheet" href="styles.css?v=10">
+    <link rel="stylesheet" href="styles.css?v=11">
     <meta name="description" content="%(desc)s">
     <link rel="canonical" href="https://albazzaztariq.github.io/kazakh-language/game.html">
     <meta name="theme-color" content="#00AFCA">
@@ -211,15 +233,20 @@ page = """<!DOCTYPE html>
         <a href="index.html" class="back-link">&larr; Back to Home</a>
 
         <header>
-            <h1 class="section-title">Word Game</h1>
-            <p class="section-subtitle">Common Words flash cards</p>
+            <h1 class="section-title">Common Words Test</h1>
+            <p class="section-subtitle">Flash cards for the Common Words vocabulary</p>
         </header>
 
         <div class="divider"></div>
 
         <div class="game">
             <div id="setup">
-                <div class="setup-title">Select One or More Groups of Vocabulary to Review</div>
+                <div class="setup-title">Question Word Displayed in:</div>
+                <div class="lang-row">
+                    <button type="button" class="group-btn lang-btn" id="langKk" aria-pressed="true">Kazakh</button>
+                    <button type="button" class="group-btn lang-btn" id="langEn" aria-pressed="false">English</button>
+                </div>
+                <div class="setup-title setup-title-groups">Select One or More Groups of Vocabulary to Review</div>
                 <div class="group-grid" id="groups"></div>
                 <button type="button" class="any-btn" id="anyBtn" aria-pressed="false">Any</button>
                 <div class="deck-size" id="sizeBox" hidden>

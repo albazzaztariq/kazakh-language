@@ -22,10 +22,12 @@ STEPS = [
         ("Have done (has gone)", "бар + ған", "кел + ген"),
         ("Not + past (did not go)", "бар + ма + ды", "кел + ме + ді"),
         ("Not + now / future (does not go)", "бар + ма + й", "кел + ме + й")]),
-    ("Three spelling exceptions", ["Rule", "Example", "English"], C3, [
+    ("Spelling exceptions", ["Rule", "Example", "English"], C3, [
         ("Stem ends in қ к п с т ш: ды / ді becomes ты / ті", "кет + ті = кетті", "he left"),
         ("Stem ends in қ к п с т ш: ма / ме becomes па / пе", "іш + пе + й + мін = ішпеймін", "I do not drink"),
-        ("Stem ends in a vowel: а / е becomes й", "сөйле + й + мін = сөйлеймін", "I speak")]),
+        ("Stem ends in қ к п с т ш: ған / ген becomes қан / кен", "кет + кен + мін = кеткенмін", "I have left"),
+        ("Stem ends in a vowel: а / е becomes й", "сөйле + й + мін = сөйлеймін", "I speak"),
+        ("Stem ends in a vowel: ып / іп becomes п", "істе + п жатыр + мын = істеп жатырмын", "I am working")]),
     ("Step 4: Add who (hard / soft again, same rule as step 2)", ["Who", "Past", "Usually / future", "Right now (after жатыр)"], ["c0", "c1", "c1", "c1"], [
         ("мен (I)", "-м", "-мын / -мін", "-мын"), ("сен (you)", "-ң", "-сың / -сің", "-сың"),
         ("сіз (you, polite)", "-ңыз / -ңіз", "-сыз / -сіз", "-сыз"), ("ол (he / she)", "nothing", "-ды / -ді", "nothing"),
@@ -96,7 +98,7 @@ html = f"""<!DOCTYPE html>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{title}</title>
-    <link rel="stylesheet" href="styles.css?v=10">
+    <link rel="stylesheet" href="styles.css?v=11">
     <meta name="description" content="{desc}">
     <link rel="canonical" href="https://albazzaztariq.github.io/kazakh-language/verbs.html">
     <meta name="theme-color" content="#00AFCA">
