@@ -1049,3 +1049,100 @@ html {
     .vg-built { font-size: 1.25rem; }
     .vg-task { font-size: 1.05rem; }
 }
+
+/* ---- Create Deck page (create-deck.html) ---- */
+.pick-row { cursor: pointer; }
+.pick-row.picked td { background: rgba(255, 215, 0, 0.24); }
+.pick-cb {
+    width: 22px;
+    height: 22px;
+    margin: 0 8px 0 0;
+    vertical-align: middle;
+    accent-color: #FFD700;
+    cursor: pointer;
+}
+#pickScreen { padding-bottom: 90px; }
+.float-top,
+.float-create {
+    position: fixed;
+    bottom: 18px;
+    z-index: 50;
+    border: none;
+    border-radius: 999px;
+    cursor: pointer;
+}
+.float-top {
+    left: 12px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 12px 18px;
+    font: inherit;
+    font-size: 1rem;
+    font-weight: 700;
+    color: #1a1a2e;
+    background: linear-gradient(135deg, #FFD700, #DAA520);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
+    transform: translateX(-170%);
+    transition: transform 0.3s ease;
+}
+.float-top.show { transform: translateX(0); }
+.float-create {
+    right: 12px;
+    padding: 14px 20px;
+    font-family: 'Cinzel', serif;
+    font-size: 1rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    color: #ffffff;
+    background: linear-gradient(135deg, #3cc878, #2e9e5b);
+    border: 3px solid #1f7a43;
+    box-shadow: 0 6px 18px rgba(31, 122, 67, 0.5);
+}
+.float-create:disabled {
+    color: rgba(255, 255, 255, 0.75);
+    background: rgba(90, 100, 115, 0.9);
+    border-color: rgba(255, 255, 255, 0.3);
+    box-shadow: none;
+    cursor: not-allowed;
+}
+.float-top[hidden],
+.float-create[hidden] { display: none; }
+.name-card { max-width: 560px; margin: 0 auto; }
+#deckName {
+    width: 100%;
+    padding: 14px;
+    font: inherit;
+    font-size: 1.1rem;
+    color: #1a1a2e;
+    background: rgba(255, 255, 255, 0.92);
+    border: 2px solid #DAA520;
+    border-radius: 12px;
+}
+.acct {
+    margin: 18px 0 8px;
+    font-size: 0.95rem;
+    text-align: center;
+    color: #ffffff;
+}
+.google-btn { width: 100%; padding-left: 0; padding-right: 0; text-align: center; }
+.name-note { margin-top: 10px; font-size: 0.85rem; color: rgba(255, 255, 255, 0.85); }
+.link-btn.inline { display: inline; margin: 0; padding: 0; }
+.deck-words { margin-top: 18px; color: rgba(255, 255, 255, 0.9); }
+.deck-words summary { cursor: pointer; }
+.deck-words ul { margin: 10px 0 0; padding-left: 20px; }
+
+/* ---- Word game: Saved Decks ---- */
+.saved-btn { margin: 0 0 12px; background: #0f7f8f; border-color: #0a5c68; }
+.saved-btn:hover { background: #159aad; }
+.saved-btn[aria-expanded="true"] { background: #0a5c68; border-color: #FFD700; }
+.saved-panel { margin: 0 0 18px; padding: 14px; background: rgba(255, 255, 255, 0.12); border-radius: 14px; text-align: center; color: #ffffff; }
+.saved-status { margin: 0 0 10px; font-size: 0.95rem; }
+.saved-account { margin-top: 12px; font-size: 0.85rem; color: rgba(255, 255, 255, 0.85); }
+.saved-panel .btn { width: 100%; padding-left: 0; padding-right: 0; text-align: center; }
+.game [hidden] { display: none !important; }
+
+/* user-typed deck names can be long single words: let those (and only those) break anywhere */
+.saved-btn,
+#savedList .group-btn,
+#deckWords li { overflow-wrap: anywhere; }

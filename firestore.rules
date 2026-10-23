@@ -1,0 +1,13 @@
+rules_version = '2';
+// Firestore security rules for KazWorld saved decks: a signed-in user can read, create, update and delete only their own decks,
+// and a deck must have a short name and between 5 and 200 words.
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /users/{uid}/decks/{deckId} {
+      allow read, delete: if request.auth != null && request.auth.uid == uid;
+      allow create, update: if request.auth != null && request.auth.uid == uid
+        && request.resource.data.name is string && request.resource.data.name.size() > 0 && request.resource.data.name.size() <= 40
+        && request.resource.data.words is list && request.resource.data.words.size() >= 5 && request.resource.data.words.size() <= 200;
+    }
+  }
+}

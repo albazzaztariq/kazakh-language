@@ -98,7 +98,7 @@ html = f"""<!DOCTYPE html>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{title}</title>
-    <link rel="stylesheet" href="styles.css?v=12">
+    <link rel="stylesheet" href="styles.css?v=14">
     <meta name="description" content="{desc}">
     <link rel="canonical" href="https://albazzaztariq.github.io/kazakh-language/verbs.html">
     <meta name="theme-color" content="#00AFCA">

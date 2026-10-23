@@ -14,6 +14,9 @@ Flow   : 1) Setup screen. "Question Word Displayed in:" with Kazakh / English bu
             1.5 seconds, then the next card appears. A rolling click-counter shows "Cards Completed" = unique cards ever completed this visit; it
             only animates when the number actually changes.
          3) Results (score only here). Score = 100 x (1 - wrong picks / (cards x 3)). Buttons: Repeat This Deck, Generate New Deck, Change Groups.
+Saved decks: a "Saved Decks" button above the question-language row expands the signed-in user's decks (Google sign-in, deck-store.js). Picking a deck hides the groups,
+Any, Create Deck and the slider, leaving the Kazakh / English choice and Go; tapping the deck again restores everything. A saved deck always uses all its words.
+"Create Deck" (same style as Any) opens create-deck.html, where words are ticked, named and saved.
 Keys 1-4 also pick a choice. Output: game.html (styles live in styles.css under "Word game").
 """
 import re, json, html, os
@@ -68,6 +71,7 @@ JS = r"""
             b.addEventListener('click', () => { if (anySelected) return; selected.has(name) ? selected.delete(name) : selected.add(name); refreshSetup(); });
             groupsEl.appendChild(b);
         });
+        let savedDeck = null;                                    // a saved deck picked in the Saved Decks panel (then groups, Any and the slider are hidden)
         function refreshSetup() {
             [...groupsEl.children].forEach(b => {
                 b.setAttribute('aria-pressed', selected.has(b.textContent) ? 'true' : 'false');
@@ -75,7 +79,9 @@ JS = r"""
             });
             anyBtn.setAttribute('aria-pressed', anySelected ? 'true' : 'false');
             updateNote();
-            goBtn.disabled = !(anySelected || selected.size > 0);
+            goBtn.disabled = savedDeck ? false : !(anySelected || selected.size > 0);
+            $('groupBlock').hidden = !!savedDeck;
+            $('savedBtn').textContent = savedDeck ? 'Saved Decks: ' + savedDeck.name : 'Saved Decks';
         }
         anyBtn.addEventListener('click', () => { anySelected = !anySelected; if (anySelected) selected.clear(); refreshSetup(); });
 
@@ -143,9 +149,9 @@ JS = r"""
 
         // A deck is deckSize random words from the selected groups (or from everything for Any); a selection smaller than deckSize uses all its words.
         // New decks avoid words already dealt from the same selection until that selection runs out.
-        let pool = CARDS;
+        let pool = CARDS, wholePool = false;                     // wholePool: a saved deck always uses all of its words
         function newDeck() {
-            const take = Math.min(deckSize, pool.length);
+            const take = wholePool ? pool.length : Math.min(deckSize, pool.length);
             let fresh = shuffle(pool.filter(c => !used.has(c)));
             if (fresh.length < take) { pool.forEach(c => used.delete(c)); fresh = shuffle(pool); }
             deckCards = fresh.slice(0, take);
@@ -206,7 +212,10 @@ JS = r"""
 
         goBtn.addEventListener('click', () => {
             if (goBtn.disabled) return;
-            settleSize(); pool = anySelected ? CARDS : CARDS.filter(c => selected.has(c.g)); newDeck();
+            if (savedDeck) { pool = savedDeck.words.map(w => CARDS.find(c => c.k === w)).filter(Boolean); wholePool = true; }
+            else { settleSize(); pool = anySelected ? CARDS : CARDS.filter(c => selected.has(c.g)); wholePool = false; }
+            if (!pool.length) return;
+            newDeck();
             setupEl.hidden = true; roundEl.hidden = false;
         });
         $('back').addEventListener('click', backToSetup);
@@ -219,6 +228,54 @@ JS = r"""
             const b = choicesEl.querySelector('.choice[data-key="' + e.key + '"]');
             if (b && !b.disabled) b.click();
         });
+
+        // ---- saved decks: need a Google sign-in; the decks live in the account (deck-store.js) ----
+        const savedBtn = $('savedBtn'), savedPanel = $('savedPanel'), savedStatus = $('savedStatus'), savedList = $('savedList'), savedAccount = $('savedAccount');
+        let store = null, storeUser = null, storeUserKnown = false;
+        $('createBtn').addEventListener('click', () => { window.location.href = 'create-deck.html'; });
+        async function loadStore() {
+            if (store) return store;
+            try { store = await import('./deck-store.js'); } catch (e) { return null; }
+            if (store.isConfigured()) store.onUser(u => {
+                storeUser = u; storeUserKnown = true;
+                if (!u && savedDeck) { savedDeck = null; refreshSetup(); }
+                if (!savedPanel.hidden) renderSaved();
+            });
+            return store;
+        }
+        async function renderSaved() {
+            savedList.innerHTML = ''; savedAccount.innerHTML = ''; savedStatus.textContent = '';
+            if (!store) { savedStatus.textContent = 'Could not load the account code. Check your connection.'; return; }
+            if (!store.isConfigured()) { savedStatus.textContent = "Account sign-in isn't set up yet, so saved decks aren't available."; return; }
+            if (!storeUserKnown) { savedStatus.textContent = 'Checking sign-in...'; return; }
+            if (!storeUser) {
+                savedStatus.textContent = 'Sign in with Google to see your saved decks.';
+                const b = document.createElement('button'); b.type = 'button'; b.className = 'btn'; b.textContent = 'Sign in with Google';
+                b.addEventListener('click', async () => { try { await store.signIn(); } catch (e) { savedStatus.textContent = 'Sign-in did not finish. Allow pop-ups for this site and try again.'; } });
+                savedAccount.appendChild(b); return;
+            }
+            savedStatus.textContent = 'Loading your decks...';
+            let decks;
+            try { decks = await store.listDecks(); } catch (e) { savedStatus.textContent = 'Could not load your decks. Check your connection.'; return; }
+            savedStatus.textContent = decks.length ? '' : 'No saved decks yet. Use Create Deck to make one.';
+            decks.forEach(d => {
+                const b = document.createElement('button'); b.type = 'button'; b.className = 'group-btn'; b.textContent = d.name; b.dataset.id = d.id;
+                b.setAttribute('aria-pressed', savedDeck && savedDeck.id === d.id ? 'true' : 'false');
+                b.addEventListener('click', () => {                          // tap a deck to pick it, tap it again to put everything back
+                    savedDeck = (savedDeck && savedDeck.id === d.id) ? null : d;
+                    [...savedList.children].forEach(x => x.setAttribute('aria-pressed', savedDeck && x.dataset.id === savedDeck.id ? 'true' : 'false'));
+                    refreshSetup();
+                });
+                savedList.appendChild(b);
+            });
+            const who = document.createElement('span'); who.textContent = 'Signed in as ' + (storeUser.name ? storeUser.name + ' \u00b7 ' : '') + storeUser.email + ' ';
+            const out = document.createElement('button'); out.type = 'button'; out.className = 'link-btn inline'; out.textContent = 'Sign out';
+            out.addEventListener('click', () => store.signOutUser()); savedAccount.append(who, out);
+        }
+        savedBtn.addEventListener('click', async () => {
+            const open = savedPanel.hidden; savedPanel.hidden = !open; savedBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+            if (open) { savedStatus.textContent = 'Loading...'; await loadStore(); renderSaved(); }
+        });
         showCount(); refreshSetup();
 """
 
@@ -230,7 +287,7 @@ page = """<!DOCTYPE html>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>%(title)s</title>
-    <link rel="stylesheet" href="styles.css?v=12">
+    <link rel="stylesheet" href="styles.css?v=14">
     <meta name="description" content="%(desc)s">
     <link rel="canonical" href="https://albazzaztariq.github.io/kazakh-language/game.html">
     <meta name="theme-color" content="#00AFCA">
@@ -248,14 +305,22 @@ page = """<!DOCTYPE html>
 
         <div class="game">
             <div id="setup">
+                <button type="button" class="any-btn saved-btn" id="savedBtn" aria-expanded="false">Saved Decks</button>
+                <div class="saved-panel" id="savedPanel" hidden>
+                    <div class="saved-status" id="savedStatus"></div>
+                    <div class="group-grid" id="savedList"></div>
+                    <div class="saved-account" id="savedAccount"></div>
+                </div>
                 <div class="setup-title">Question Word Displayed in:</div>
                 <div class="lang-row">
                     <button type="button" class="group-btn lang-btn" id="langKk" aria-pressed="true">Kazakh</button>
                     <button type="button" class="group-btn lang-btn" id="langEn" aria-pressed="false">English</button>
                 </div>
+                <div id="groupBlock">
                 <div class="setup-title setup-title-groups">Select One or More Groups of Vocabulary to Review</div>
                 <div class="group-grid" id="groups"></div>
                 <button type="button" class="any-btn" id="anyBtn" aria-pressed="false">Any</button>
+                <button type="button" class="any-btn" id="createBtn">Create Deck</button>
                 <div class="deck-size" id="sizeBox">
                     <label class="deck-size-label" for="sizeNum">Cards per deck</label>
                     <div class="deck-size-row">
@@ -264,6 +329,7 @@ page = """<!DOCTYPE html>
                     </div>
                     <div class="deck-size-msg" id="sizeMsg" role="alert"></div>
                     <div class="deck-size-note" id="sizeNote"></div>
+                </div>
                 </div>
                 <button type="button" class="go-btn" id="go" disabled>Go</button>
             </div>
