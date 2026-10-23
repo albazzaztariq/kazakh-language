@@ -115,6 +115,11 @@ player = """
                 a.play().catch(done);
             });
         });
+        const topBtn = document.getElementById('toTop');
+        const syncTop = () => topBtn.classList.toggle('show', window.scrollY > 380);
+        window.addEventListener('scroll', syncTop, { passive: true });
+        topBtn.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+        syncTop();
     </script>
 """ % json.dumps(audio, ensure_ascii=False)
 html = head + f"""<body>
@@ -140,6 +145,7 @@ html = head + f"""<body>
             <p>Qazaq tilin &uuml;yren&iuml;ңіз &mdash; Learn the Kazakh language</p>
         </footer>
     </div>
+    <button type="button" class="float-top" id="toTop" aria-label="Back to the top of the page"><span aria-hidden="true">&uarr;</span> Top</button>
 {player}</body>
 </html>
 """
