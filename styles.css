@@ -1159,3 +1159,10 @@ html {
 }
 .missed-q { color: rgba(255, 255, 255, 0.85); }
 .missed-a { font-weight: 700; color: #7be0a4; }
+
+/* ---- Culture page ---- */
+.culture-terms { margin: 4px 0 10px; font-style: italic; color: rgba(255, 255, 255, 0.8); }
+.culture-def { margin: 0 0 14px; font-size: 1.1rem; line-height: 1.6; }
+.culture-eg-title { margin: 0 0 6px; font-size: 1rem; letter-spacing: 2px; text-transform: uppercase; color: #FFE44D; }
+.culture-eg { margin: 0; padding-left: 22px; }
+.culture-eg li { margin-bottom: 8px; line-height: 1.55; }
