@@ -1146,3 +1146,16 @@ html {
 .saved-btn,
 #savedList .group-btn,
 #deckWords li { overflow-wrap: anywhere; }
+
+/* ---- Word game: missed cards on the results screen ---- */
+.missed-box { margin: 0 0 26px; text-align: left; }
+.missed-title { margin-bottom: 8px; font-size: 1.05rem; font-weight: 700; letter-spacing: 3px; text-align: center; text-transform: uppercase; color: #FFE44D; }
+.missed-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    padding: 10px 12px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.18);
+}
+.missed-q { color: rgba(255, 255, 255, 0.85); }
+.missed-a { font-weight: 700; color: #7be0a4; }

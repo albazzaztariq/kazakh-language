@@ -42,10 +42,10 @@ JS = r"""
         const NOUN_GROUPS = new Set(['People', 'Everyday Nouns', 'Family', 'Food', 'Animals', 'Body', 'Nature', 'Places', 'Days of the Week', 'Time']);
         const $ = id => document.getElementById(id);
         const setupEl = $('setup'), roundEl = $('round'), groupsEl = $('groups'), anyBtn = $('anyBtn'), goBtn = $('go'), sizeBox = $('sizeBox');
-        const wordEl = $('word'), choicesEl = $('choices'), countEl = $('count'), playEl = $('play'), resultEl = $('result'), scoreEl = $('score');
+        const wordEl = $('word'), choicesEl = $('choices'), countEl = $('count'), playEl = $('play'), resultEl = $('result'), scoreEl = $('score'), missedBox = $('missedBox'), missedEl = $('missed');
         const rangeEl = $('sizeRange'), numEl = $('sizeNum'), msgEl = $('sizeMsg'), noteEl = $('sizeNote'), freshBtn = $('fresh'), speakEl = $('speak');
         const langKk = $('langKk'), langEn = $('langEn');
-        let deckCards = [], deck = [], current = null, locked = false, wrongPicks = 0, deckSize = 20, anySelected = false, nextTimer = null;
+        let missed = new Set(), deckCards = [], deck = [], current = null, locked = false, wrongPicks = 0, deckSize = 20, anySelected = false, nextTimer = null;
         let lang = 'kk';                   // language of the question: 'kk' = Kazakh word shown, English choices; 'en' = English shown, Kazakh choices
         const selected = new Set();        // chosen group names
         const used = new Set();            // cards already dealt in an Any deck (new Any decks avoid them until the vocabulary runs out)
@@ -141,7 +141,7 @@ JS = r"""
 
         // Repeating a deck keeps the counter where it is: it only counts cards never completed before.
         function startDeck() {
-            deck = shuffle(deckCards); wrongPicks = 0;
+            deck = shuffle(deckCards); wrongPicks = 0; missed = new Set();
             resultEl.hidden = true; playEl.hidden = false;
             speakEl.hidden = lang !== 'kk';                      // an English question has no audio (it would give the answer away)
             nextCard();
@@ -162,7 +162,21 @@ JS = r"""
         // Every card is worth 100 / deck size points; each wrong pick costs a third of a card (a card can have at most 3 wrong picks).
         function finishDeck() {
             scoreEl.textContent = Math.round(100 * (1 - wrongPicks / (deckCards.length * MAX_WRONG_PER_CARD)));
+            showMissed();
             playEl.hidden = true; resultEl.hidden = false;
+        }
+
+        // Cards that got at least one wrong pick, in deck order: the question as it was shown, then the right answer in the other language.
+        function showMissed() {
+            missedEl.innerHTML = '';
+            const wrong = deckCards.filter(c => missed.has(c));
+            missedBox.hidden = !wrong.length;
+            wrong.forEach(c => {
+                const row = document.createElement('div'); row.className = 'missed-row';
+                const q = document.createElement('span'); q.className = 'missed-q'; q.lang = lang === 'kk' ? 'kk' : 'en'; q.textContent = lang === 'kk' ? c.k : c.e;
+                const a = document.createElement('span'); a.className = 'missed-a'; a.lang = lang === 'kk' ? 'en' : 'kk'; a.textContent = lang === 'kk' ? c.e : c.k;
+                row.append(q, a); missedEl.appendChild(row);
+            });
         }
 
         // Speaker button: plays the word's clip from Common Words/Words Audio/ (file name = the word's code points in hex). Never plays by itself.
@@ -201,7 +215,7 @@ JS = r"""
                 completedCards.add(current); showCount();          // showCount ignores a card that was already counted
                 nextTimer = setTimeout(nextCard, NEXT_DELAY_MS);
             } else {
-                wrongPicks++; btn.classList.add('wrong'); btn.disabled = true;
+                wrongPicks++; missed.add(current); btn.classList.add('wrong'); btn.disabled = true;
             }
         }
 
@@ -287,7 +301,7 @@ page = """<!DOCTYPE html>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>%(title)s</title>
-    <link rel="stylesheet" href="styles.css?v=14">
+    <link rel="stylesheet" href="styles.css?v=15">
     <meta name="description" content="%(desc)s">
     <link rel="canonical" href="https://albazzaztariq.github.io/kazakh-language/game.html">
     <meta name="theme-color" content="#00AFCA">
@@ -352,6 +366,10 @@ page = """<!DOCTYPE html>
                 <div class="game-result" id="result" hidden>
                     <div class="result-label">Score</div>
                     <div class="result-score"><span id="score">0</span><span class="result-max"> / 100</span></div>
+                    <div class="missed-box" id="missedBox" hidden>
+                        <div class="missed-title">Missed</div>
+                        <div class="missed-list" id="missed"></div>
+                    </div>
                     <div class="game-actions">
                         <button type="button" class="btn" id="repeat">Repeat This Deck</button>
                         <button type="button" class="btn" id="fresh">Generate New Deck</button>
