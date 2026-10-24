@@ -42,7 +42,8 @@ FOOD_MORE = [("сиыр еті", "si-yr e-ti", "beef"), ("қой еті", "qoi e
 # ---- assemble sections in page order: (anchor id, title, rows, pill label or None) --------------------------------------
 # Every word is looked up by its Kazakh spelling in POOL, so a section is just an ordered list of words and related words can sit together.
 NEW_ROWS = [("бұрын", "bu-ryn", "before / ago (after a time: екі жыл бұрын = two years ago)"), ("кейін", "kei-in", "after / later"),
-            ("болашақ", "bo-la-shaq", "future"), ("болашақта", "bo-la-shaq-ta", "in the future")]
+            ("болашақ", "bo-la-shaq", "future"), ("болашақта", "bo-la-shaq-ta", "in the future"),
+            ("ерте", "er-te", "early"), ("кеш", "kesh", "late / evening")]   # кеш is one word for both late and evening
 POOL = {}
 for _rows in list(WORDS.values()) + [ADJ_SIZE, ADJ_FEEL, ADJ_STATE, ADJ_MORE, FOOD_MORE, NEW_ROWS, [("тауық", "ta-uyq", "chicken (the bird)")]]:
     for _r in _rows: POOL[_r[0]] = _r
@@ -73,7 +74,7 @@ add("adjectives-more", "Adjectives: more opposites", pick("жақсы | жама
 add("nouns", "Everyday nouns", pick("ақша | кітап | есік"), "Nouns")
 add("colors", "Colors", pick(" | ".join(r[0] for r in WORDS["Colors"])), "Colors")
 add("family", "Family", pick("ана | әке | ата | әже | аға | апа | ұл | қыз"), "Family")
-add("time", "Time", pick("күн | түн | апта | ай | жыл | бұрын | кейін | болашақ | болашақта | уақыт | сағат | қазір | кеше | бүгін | ертең | таңертең | кеш"), "Time")
+add("time", "Time", pick("күн | түн | апта | ай | жыл | бұрын | кейін | болашақ | болашақта | уақыт | сағат | қазір | кеше | бүгін | ертең | таңертең | ерте | кеш"), "Time")
 add("days", "Days of the week", pick(" | ".join(r[0] for r in WORDS["Days of the week"])), "Days")
 add("food", "Food & drink", pick("тамақ | нан | ет | сиыр еті | қой еті | тауық еті | балық | жұмыртқа | ірімшік | май | тұз | қант | сорпа | алма | картоп | күріш | су | шай | сүт | қымыз"), "Food")
 add("animals", "Animals", pick(" | ".join(r[0] for r in WORDS["Animals"]) + " | тауық"), "Animals")
