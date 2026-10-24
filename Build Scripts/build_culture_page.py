@@ -29,9 +29,9 @@ TOPICS = [
       "Clans belong to one of three historical groupings, the <em>жүз</em> (zhuz): the Senior, Middle and Junior Zhuz.",
       "Because of the seven-generation rule, people marry outside their own paternal line.",
       "A well-known saying: <em>Жеті атасын білмеген &mdash; жетесіз</em>, roughly &ldquo;a person who does not know their seven ancestors lacks proper upbringing&rdquo;."]),
-    ("hospitality", "Hospitality", "Hospitality and the dastarkhan (дастархан)", "қонақжайлылық &middot; qo-naq-zhai-ly-lyq &middot; hospitality",
+    ("hospitality", "Hospitality", "Hospitality (қонақжайлылық)", "қонақжайлылық &middot; qo-naq-zhai-ly-lyq &middot; hospitality &nbsp;|&nbsp; дастархан &middot; das-tar-khan &middot; the cloth spread with food for guests, and by extension the meal itself",
      "A guest (<em>қонақ</em>, qo-naq) is treated with great honour in Kazakh culture, and welcoming one is a duty and a pleasure. "
-     "The host covers the <em>дастархан</em> (das-tar-khan), the spread tablecloth, with tea, bread, sweets and as much food as the home can offer. "
+     "The host sets out the <em>дастархан</em> (das-tar-khan), the cloth spread on the floor or table and covered with tea, bread, sweets and as much food as the home can offer; the word also means the meal itself. "
      "A common saying is <em>Қонақ келсе &mdash; құт келеді</em>, &ldquo;when a guest comes, good fortune comes&rdquo;.",
      ["Tea (<em>шай</em>) comes first and is poured only half-way into the small bowl (<em>кесе</em>, ke-se) so that it stays hot; the host keeps refilling it as a sign of care.",
       "The most honoured guest is seated at the <em>төр</em> (tör), the place of honour farthest from the door.",
@@ -53,7 +53,7 @@ TOPICS = [
      "Aitys is a contest in which two <em>ақын</em> (a-qyn), improvising poets, sing verses against each other with wit and sharp humour, often on the spot. "
      "Both are central to the Kazakh oral tradition, which kept history and poetry alive long before they were written down.",
      ["At festivals and on television, an aitys pits two akyns against each other; the audience cheers the best answers.",
-      "<em>Күй</em> (küi) are instrumental pieces for the dombra that tell a story or describe an event, a feeling or an animal; Kurmangazy is one of the most famous composers of küi.",
+      "<em>Күй</em> (küi) are instrumental pieces for the dombra that tell a story or describe an event, a feeling or an animal; Kurmangazy, a 19th-century composer, is one of the most famous writers of küi.",
       "<em>Жырау</em> (zhy-rau) were singers of epic poems who performed history and advice for khans and the people.",
       "Many Kazakh families keep a dombra at home, and children often learn to play it.",
       "National Dombra Day is celebrated on the first Sunday of July.",
