@@ -864,11 +864,11 @@ html {
     display: block;
     width: 100%;
     margin: 26px 0 0;
-    padding: 18px 10px;
+    padding: 13px 10px;
     font-family: 'Cinzel', serif;
-    font-size: 1.5rem;
+    font-size: 1.2rem;
     font-weight: 700;
-    letter-spacing: 4px;
+    letter-spacing: 3px;
     text-transform: uppercase;
     color: #ffffff;
     background: linear-gradient(135deg, #3cc878, #2e9e5b);
@@ -1166,3 +1166,14 @@ html {
 .culture-eg-title { margin: 0 0 6px; font-size: 1rem; letter-spacing: 2px; text-transform: uppercase; color: #FFE44D; }
 .culture-eg { margin: 0; padding-left: 22px; }
 .culture-eg li { margin-bottom: 8px; line-height: 1.55; }
+
+/* ---- Word game: Review First ---- */
+.go-row { display: flex; align-items: center; gap: 14px; margin-top: 26px; }
+.go-row .go-btn { flex: 1; width: auto; margin: 0; }
+.review-check { display: flex; align-items: center; gap: 8px; font-size: 1rem; font-weight: 700; cursor: pointer; }
+.review-check input { width: 22px; height: 22px; accent-color: #FFD700; cursor: pointer; }
+.review-title { margin-bottom: 10px; font-size: 1.05rem; font-weight: 700; letter-spacing: 3px; text-align: center; text-transform: uppercase; color: #FFE44D; }
+.review-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 10px 12px; border-bottom: 1px solid rgba(255, 255, 255, 0.18); }
+.review-k { font-weight: 700; }
+.review-e { color: rgba(255, 255, 255, 0.85); }
+.review-go { margin-top: 22px; }

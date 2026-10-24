@@ -45,7 +45,7 @@ JS = r"""
         const wordEl = $('word'), choicesEl = $('choices'), countEl = $('count'), playEl = $('play'), resultEl = $('result'), scoreEl = $('score'), missedBox = $('missedBox'), missedEl = $('missed');
         const rangeEl = $('sizeRange'), numEl = $('sizeNum'), msgEl = $('sizeMsg'), noteEl = $('sizeNote'), freshBtn = $('fresh'), speakEl = $('speak');
         const langKk = $('langKk'), langEn = $('langEn');
-        let missed = new Set(), deckCards = [], deck = [], current = null, locked = false, wrongPicks = 0, deckSize = 20, anySelected = false, nextTimer = null;
+        let reviewMode = false, pendingAdvance = false, missed = new Set(), deckCards = [], deck = [], current = null, locked = false, wrongPicks = 0, deckSize = 20, anySelected = false, nextTimer = null;
         let lang = 'kk';                   // language of the question: 'kk' = Kazakh word shown, English choices; 'en' = English shown, Kazakh choices
         const selected = new Set();        // chosen group names
         const used = new Set();            // cards already dealt in an Any deck (new Any decks avoid them until the vocabulary runs out)
@@ -142,7 +142,7 @@ JS = r"""
         // Repeating a deck keeps the counter where it is: it only counts cards never completed before.
         function startDeck() {
             deck = shuffle(deckCards); wrongPicks = 0; missed = new Set();
-            resultEl.hidden = true; playEl.hidden = false;
+            resultEl.hidden = true; playEl.hidden = false; syncPause();
             speakEl.hidden = lang !== 'kk';                      // an English question has no audio (it would give the answer away)
             nextCard();
         }
@@ -163,7 +163,7 @@ JS = r"""
         function finishDeck() {
             scoreEl.textContent = Math.round(100 * (1 - wrongPicks / (deckCards.length * MAX_WRONG_PER_CARD)));
             showMissed();
-            playEl.hidden = true; resultEl.hidden = false;
+            playEl.hidden = true; resultEl.hidden = false; syncPause();
         }
 
         // Cards that got at least one wrong pick, in deck order: the question as it was shown, then the right answer in the other language.
@@ -221,15 +221,41 @@ JS = r"""
 
         function backToSetup() {
             clearTimeout(nextTimer); stopAudio();
-            roundEl.hidden = true; setupEl.hidden = false;
+            roundEl.hidden = true; reviewEl.hidden = true; setupEl.hidden = false;
         }
+
+        // ---- Review First: a page listing every card of the deck (Kazakh and English). Play Deck starts the round; Pause & Review comes back here with Resume. ----
+        const reviewEl = $('review'), reviewListEl = $('reviewList'), reviewGo = $('reviewGo'), pauseBtn = $('pauseReview'), reviewCheck = $('reviewFirst');
+        function syncPause() { pauseBtn.hidden = !(reviewMode && !playEl.hidden); }
+        function showReview(resume) {
+            clearTimeout(nextTimer); stopAudio();
+            pendingAdvance = resume && locked;                    // paused between a right answer and the next card: go on to the next card on Resume
+            reviewListEl.innerHTML = '';
+            deckCards.forEach(c => {
+                const row = document.createElement('div'); row.className = 'review-row';
+                const k = document.createElement('span'); k.className = 'review-k'; k.lang = 'kk'; k.textContent = c.k;
+                const e = document.createElement('span'); e.className = 'review-e'; e.lang = 'en'; e.textContent = c.e;
+                row.append(k, e); reviewListEl.appendChild(row);
+            });
+            reviewGo.textContent = resume ? 'Resume' : 'Play Deck';
+            setupEl.hidden = true; roundEl.hidden = true; reviewEl.hidden = false;
+            window.scrollTo(0, 0);
+        }
+        reviewGo.addEventListener('click', () => {
+            reviewEl.hidden = true; roundEl.hidden = false;
+            if (pendingAdvance) { pendingAdvance = false; nextCard(); }
+            window.scrollTo(0, 0);
+        });
+        pauseBtn.addEventListener('click', () => showReview(true));
 
         goBtn.addEventListener('click', () => {
             if (goBtn.disabled) return;
             if (savedDeck) { pool = savedDeck.words.map(w => CARDS.find(c => c.k === w)).filter(Boolean); wholePool = true; }
             else { settleSize(); pool = anySelected ? CARDS : CARDS.filter(c => selected.has(c.g)); wholePool = false; }
             if (!pool.length) return;
+            reviewMode = reviewCheck.checked;
             newDeck();
+            if (reviewMode) { showReview(false); return; }
             setupEl.hidden = true; roundEl.hidden = false;
         });
         $('back').addEventListener('click', backToSetup);
@@ -301,7 +327,7 @@ page = """<!DOCTYPE html>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>%(title)s</title>
-    <link rel="stylesheet" href="styles.css?v=15">
+    <link rel="stylesheet" href="styles.css?v=17">
     <meta name="description" content="%(desc)s">
     <link rel="canonical" href="https://albazzaztariq.github.io/kazakh-language/game.html">
     <meta name="theme-color" content="#00AFCA">
@@ -345,11 +371,21 @@ page = """<!DOCTYPE html>
                     <div class="deck-size-note" id="sizeNote"></div>
                 </div>
                 </div>
-                <button type="button" class="go-btn" id="go" disabled>Go</button>
+                <div class="go-row">
+                    <label class="review-check"><input type="checkbox" id="reviewFirst"> <span>Review First</span></label>
+                    <button type="button" class="go-btn" id="go" disabled>Go</button>
+                </div>
+            </div>
+
+            <div id="review" hidden>
+                <div class="review-title">Review</div>
+                <div class="review-list" id="reviewList"></div>
+                <button type="button" class="go-btn review-go" id="reviewGo">Play Deck</button>
             </div>
 
             <div id="round" hidden>
                 <button type="button" class="link-btn" id="back">&larr; Change groups</button>
+                <button type="button" class="link-btn" id="pauseReview" hidden>Pause &amp; Review</button>
                 <div class="tally" aria-live="polite">
                     <span class="tally-label">Cards Completed</span>
                     <div class="tally-digits" id="count" aria-label="Cards completed: 0"></div>
