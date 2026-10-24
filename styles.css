@@ -1177,3 +1177,30 @@ html {
 .review-k { font-weight: 700; }
 .review-e { color: rgba(255, 255, 255, 0.85); }
 .review-go { margin-top: 22px; }
+
+/* ---- Culture page: buttons frozen at the top, one topic shown at a time, floating Home ---- */
+.culture-nav {
+    position: sticky;
+    top: 0;
+    z-index: 40;
+    margin: 0 0 20px;
+    padding: 10px 0;
+    background-color: #00AFCA;
+    box-shadow: 0 0 0 100vmax #00AFCA;      /* paints the bar edge to edge ... */
+    clip-path: inset(0 -100vmax);           /* ... but only sideways, not above or below it */
+}
+.culture-nav button {
+    padding: 6px 14px;
+    font: inherit;
+    font-size: 0.8rem;
+    letter-spacing: 0.5px;
+    color: #FFD700;
+    background: rgba(26, 26, 46, 0.55);
+    border: 1px solid rgba(255, 215, 0, 0.5);
+    border-radius: 999px;
+    cursor: pointer;
+}
+.culture-nav button[aria-pressed="true"] { color: #1a1a2e; background: linear-gradient(135deg, #FFD700, #DAA520); font-weight: 700; }
+.culture-topic[hidden] { display: none; }
+a.float-top { text-decoration: none; }
+.float-home { transform: none; }

@@ -60,10 +60,10 @@ TOPICS = [
       "UNESCO has recognised the aitys tradition as part of humanity&rsquo;s intangible cultural heritage."]),
 ]
 
-pills = "".join(f"<a href=\"#{i}\">{p}</a>" for i, p, *_ in TOPICS)
+pills = "".join(f"<button type=\"button\" data-topic=\"{i}\" aria-pressed=\"false\">{p}</button>" for i, p, *_ in TOPICS)
 def section(i, pill, title, terms, definition, examples):
     li = "".join(f"<li>{e}</li>" for e in examples)
-    return (f"        <section class=\"lesson-section culture-topic\" id=\"{i}\"><h2>{title}</h2>"
+    return (f"        <section class=\"lesson-section culture-topic\" id=\"{i}\" hidden><h2>{title}</h2>"
             f"<p class=\"culture-terms\">{terms}</p><p class=\"culture-def\">{definition}</p>"
             f"<h3 class=\"culture-eg-title\">Examples</h3><ul class=\"culture-eg\">{li}</ul></section>\n")
 body = "".join(section(*t) for t in TOPICS)
@@ -79,7 +79,7 @@ page = f"""<!DOCTYPE html>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{TITLE}</title>
-    <link rel="stylesheet" href="styles.css?v=16">
+    <link rel="stylesheet" href="styles.css?v=18">
 <!-- seo -->
     <meta name="description" content="{DESC}">
     <link rel="canonical" href="{URL}">
@@ -101,24 +101,30 @@ page = f"""<!DOCTYPE html>
 
         <div class="divider"></div>
 
-        <nav class="jump-links" aria-label="Jump to a topic">{pills}</nav>
+        <nav class="jump-links culture-nav" id="cultureNav" aria-label="Choose a topic">{pills}</nav>
 
 {body}
-        <div class="page-nav">
-            <a href="index.html" class="btn">Home</a>
-        </div>
-
         <footer>
             <p>Qazaq tilin &uuml;yren&iuml;ңіз &mdash; Learn the Kazakh language</p>
         </footer>
     </div>
-    <button type="button" class="float-top" id="toTop" aria-label="Back to the top of the page"><span aria-hidden="true">&uarr;</span> Top</button>
+    <a href="index.html" class="float-top float-home show" aria-label="Back to the home page">Home</a>
     <script>
-        const topBtn = document.getElementById('toTop');
-        const syncTop = () => topBtn.classList.toggle('show', window.scrollY > 380);
-        window.addEventListener('scroll', syncTop, {{ passive: true }});
-        topBtn.addEventListener('click', () => window.scrollTo({{ top: 0, behavior: 'smooth' }}));
-        syncTop();
+        const nav = document.getElementById('cultureNav');
+        const buttons = [...nav.querySelectorAll('button')], sections = [...document.querySelectorAll('.culture-topic')];
+        // Show only the chosen topic; the buttons stay frozen at the top while its text scrolls.
+        function showTopic(id, scroll) {{
+            sections.forEach(s => {{ s.hidden = s.id !== id; }});
+            buttons.forEach(b => b.setAttribute('aria-pressed', b.dataset.topic === id ? 'true' : 'false'));
+            if (scroll) {{
+                const sec = document.getElementById(id);
+                window.scrollTo(0, Math.max(0, sec.getBoundingClientRect().top + window.scrollY - nav.offsetHeight - 12));
+            }}
+            try {{ history.replaceState(null, '', '#' + id); }} catch (e) {{}}
+        }}
+        buttons.forEach(b => b.addEventListener('click', () => showTopic(b.dataset.topic, true)));
+        const fromLink = location.hash.slice(1);
+        if (sections.some(s => s.id === fromLink)) showTopic(fromLink, false);
     </script>
 </body>
 </html>
