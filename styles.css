@@ -1204,3 +1204,18 @@ html {
 .culture-topic[hidden] { display: none; }
 a.float-top { text-decoration: none; }
 .float-home { transform: none; }
+
+/* ---- Word game: small centred Pause & Review button under Change groups ---- */
+.pause-btn {
+    display: block;
+    margin: 0 auto 14px;
+    padding: 6px 16px;
+    font: inherit;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #1a1a2e;
+    background: linear-gradient(135deg, #FFD700, #DAA520);
+    border: none;
+    border-radius: 999px;
+    cursor: pointer;
+}

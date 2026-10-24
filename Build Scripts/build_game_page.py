@@ -327,7 +327,7 @@ page = """<!DOCTYPE html>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>%(title)s</title>
-    <link rel="stylesheet" href="styles.css?v=17">
+    <link rel="stylesheet" href="styles.css?v=19">
     <meta name="description" content="%(desc)s">
     <link rel="canonical" href="https://albazzaztariq.github.io/kazakh-language/game.html">
     <meta name="theme-color" content="#00AFCA">
@@ -385,7 +385,7 @@ page = """<!DOCTYPE html>
 
             <div id="round" hidden>
                 <button type="button" class="link-btn" id="back">&larr; Change groups</button>
-                <button type="button" class="link-btn" id="pauseReview" hidden>Pause &amp; Review</button>
+                <button type="button" class="pause-btn" id="pauseReview" hidden>Pause &amp; Review</button>
                 <div class="tally" aria-live="polite">
                     <span class="tally-label">Cards Completed</span>
                     <div class="tally-digits" id="count" aria-label="Cards completed: 0"></div>
