@@ -56,7 +56,9 @@ add("nouns", "Everyday nouns", [r for r in WORDS["Everyday nouns"] if r[0] not i
 add("colors", "Colors", WORDS["Colors"], "Colors")
 add("family", "Family", WORDS["Family"], "Family")
 TIME_ALL = [r for r in WORDS["Everyday nouns"] if r[0] in TIME_WORDS] + WORDS["Time"]
-TIME_ORDER = ["күн", "апта", "ай", "жыл"]   # day, week, month, year in succession, then the rest in their old order
+TIME_ALL += [("бұрын", "bu-ryn", "before / ago (after a time: екі жыл бұрын = two years ago)"), ("кейін", "kei-in", "after / later"),
+             ("болашақ", "bo-la-shaq", "future"), ("болашақта", "bo-la-shaq-ta", "in the future")]
+TIME_ORDER = ["күн", "апта", "ай", "жыл", "бұрын", "кейін", "болашақ", "болашақта"]   # day, week, month, year, before, after, future in succession, then the rest in their old order
 TIME_ALL = sorted(TIME_ALL, key=lambda r: TIME_ORDER.index(r[0]) if r[0] in TIME_ORDER else len(TIME_ORDER))
 add("time", "Time", TIME_ALL, "Time")
 add("days", "Days of the week", WORDS["Days of the week"], "Days")
