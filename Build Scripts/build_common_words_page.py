@@ -40,33 +40,49 @@ FOOD_MORE = [("сиыр еті", "si-yr e-ti", "beef"), ("қой еті", "qoi e
              ("тұз", "tuz", "salt"), ("қант", "qant", "sugar"), ("сорпа", "sor-pa", "soup")]
 
 # ---- assemble sections in page order: (anchor id, title, rows, pill label or None) --------------------------------------
+# Every word is looked up by its Kazakh spelling in POOL, so a section is just an ordered list of words and related words can sit together.
+NEW_ROWS = [("бұрын", "bu-ryn", "before / ago (after a time: екі жыл бұрын = two years ago)"), ("кейін", "kei-in", "after / later"),
+            ("болашақ", "bo-la-shaq", "future"), ("болашақта", "bo-la-shaq-ta", "in the future")]
+POOL = {}
+for _rows in list(WORDS.values()) + [ADJ_SIZE, ADJ_FEEL, ADJ_STATE, ADJ_MORE, FOOD_MORE, NEW_ROWS, [("тауық", "ta-uyq", "chicken (the bird)")]]:
+    for _r in _rows: POOL[_r[0]] = _r
+USED = []
+def pick(words):
+    """Rows for the given Kazakh words, in that order; each word may be used only once on the whole page."""
+    out = []
+    for w in words.split(" | "):
+        assert w in POOL, w
+        assert w not in USED, "used twice: " + w
+        USED.append(w); out.append(POOL[w])
+    return out
+def keep(rows, drop):
+    """The rows of an existing list minus the Kazakh words in drop (those are placed elsewhere)."""
+    return [r for r in rows if r[0] not in drop]
 SEC = []
 def add(i, title, rows, pill=None): SEC.append((i, title, rows, pill))
-add("basics", "Greetings & basics", WORDS["Greetings & basics"] + WORDS["Useful phrases"], "Basics")   # useful phrases merged in
-add("pronouns", "Pronouns", WORDS["Pronouns"], "Pronouns")
-add("questions", "Question words", WORDS["Question words"], "Questions")
-add("people", "People", WORDS["People"], "People")
-add("verbs", "Verbs (dictionary form ends in -у)", WORDS["Verbs (dictionary form ends in -у)"], "Verbs")
-add("adjectives", "Adjectives: size and shape", ADJ_SIZE, "Adjectives")
-add("adjectives-feel", "Adjectives: speed, weight and feel", ADJ_FEEL)
-add("adjectives-state", "Adjectives: temperature, light and condition", ADJ_STATE)
-add("adjectives-more", "Adjectives: more opposites", ADJ_MORE)
-TIME_WORDS = {"күн", "түн", "жыл", "уақыт"}   # day/sun, night, year, time: shown under Time, not Everyday nouns
-add("nouns", "Everyday nouns", [r for r in WORDS["Everyday nouns"] if r[0] not in TIME_WORDS], "Nouns")
-add("colors", "Colors", WORDS["Colors"], "Colors")
-add("family", "Family", WORDS["Family"], "Family")
-TIME_ALL = [r for r in WORDS["Everyday nouns"] if r[0] in TIME_WORDS] + WORDS["Time"]
-TIME_ALL += [("бұрын", "bu-ryn", "before / ago (after a time: екі жыл бұрын = two years ago)"), ("кейін", "kei-in", "after / later"),
-             ("болашақ", "bo-la-shaq", "future"), ("болашақта", "bo-la-shaq-ta", "in the future")]
-TIME_ORDER = ["күн", "апта", "ай", "жыл", "бұрын", "кейін", "болашақ", "болашақта"]   # day, week, month, year, before, after, future in succession, then the rest in their old order
-TIME_ALL = sorted(TIME_ALL, key=lambda r: TIME_ORDER.index(r[0]) if r[0] in TIME_ORDER else len(TIME_ORDER))
-add("time", "Time", TIME_ALL, "Time")
-add("days", "Days of the week", WORDS["Days of the week"], "Days")
-add("food", "Food", WORDS["Food"] + FOOD_MORE, "Food")
-add("animals", "Animals", WORDS["Animals"] + [("тауық", "ta-uyq", "chicken (the bird)")], "Animals")
-add("body", "Body", WORDS["Body"], "Body")
-add("nature", "Nature", WORDS["Nature"], "Nature")
-add("places", "Places", WORDS["Places"], "Places")
+add("basics", "Greetings & basics", pick("сәлем | сау болыңыз | рахмет | өтінемін | кешіріңіз | қалыңыз қалай | қайырлы таң | қайырлы кеш | қош келдіңіз | түсінбедім | қанша тұрады | иә | жоқ | бар | керек"), "Basics")
+add("pronouns", "Pronouns", pick(" | ".join(r[0] for r in WORDS["Pronouns"])), "Pronouns")
+add("questions", "Question words", pick(" | ".join(r[0] for r in WORDS["Question words"])), "Questions")
+add("people", "People", pick("адам | бала | дос | мұғалім"), "People")
+add("verbs", "Verbs (dictionary form ends in -у)", pick(" | ".join(r[0] for r in WORDS["Verbs (dictionary form ends in -у)"])), "Verbs")
+add("adjectives", "Adjectives: size, shape and amount", pick(" | ".join(r[0] for r in ADJ_SIZE) + " | көп | аз"), "Adjectives")
+add("adjectives-feel", "Adjectives: speed, weight and feel", pick(" | ".join(r[0] for r in ADJ_FEEL)))
+add("adjectives-state", "Adjectives: temperature, light and condition", pick(" | ".join(r[0] for r in ADJ_STATE)))
+add("adjectives-taste", "Adjectives: taste", pick("тәтті | тұзды | қышқыл | ащы"))
+add("adjectives-more", "Adjectives: more opposites", pick("жақсы | жаман | " + " | ".join(r[0] for r in keep(ADJ_MORE, {"жаман", "көп", "аз", "тәтті", "тұзды", "қышқыл", "ащы"}))))
+add("nouns", "Everyday nouns", pick("ақша | кітап | есік"), "Nouns")
+add("colors", "Colors", pick(" | ".join(r[0] for r in WORDS["Colors"])), "Colors")
+add("family", "Family", pick("ана | әке | ата | әже | аға | апа | ұл | қыз"), "Family")
+add("time", "Time", pick("күн | түн | апта | ай | жыл | бұрын | кейін | болашақ | болашақта | уақыт | сағат | қазір | кеше | бүгін | ертең | таңертең | кеш"), "Time")
+add("days", "Days of the week", pick(" | ".join(r[0] for r in WORDS["Days of the week"])), "Days")
+add("food", "Food & drink", pick("тамақ | нан | ет | сиыр еті | қой еті | тауық еті | балық | жұмыртқа | ірімшік | май | тұз | қант | сорпа | алма | картоп | күріш | су | шай | сүт | қымыз"), "Food")
+add("animals", "Animals", pick(" | ".join(r[0] for r in WORDS["Animals"]) + " | тауық"), "Animals")
+add("body", "Body", pick(" | ".join(r[0] for r in WORDS["Body"])), "Body")
+add("nature", "Nature", pick(" | ".join(r[0] for r in WORDS["Nature"])), "Nature")
+add("places", "Places", pick("үй | қала | ауыл | жол | мектеп | дүкен | базар"), "Places")
+NUMBER_WORDS = {r[0] for r in WORDS.get("Numbers", [])} | set("бір екі үш төрт бес алты жеті сегіз тоғыз он".split())   # these live on numbers.html
+assert set(USED) == set(POOL) - NUMBER_WORDS, ("left out:", set(POOL) - NUMBER_WORDS - set(USED))
+print(f"[DEBUG] {len(USED)} words placed, none lost, none doubled", flush=True)
 
 # ---- audio ---------------------------------------------------------------------------------------------------------------
 os.makedirs(AD, exist_ok=True)
