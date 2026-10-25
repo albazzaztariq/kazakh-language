@@ -1189,10 +1189,11 @@ html {
     box-shadow: 0 0 0 100vmax #00AFCA;      /* paints the bar edge to edge ... */
     clip-path: inset(0 -100vmax);           /* ... but only sideways, not above or below it */
 }
+.culture-nav { gap: 6px; }
 .culture-nav button {
-    padding: 6px 14px;
+    padding: 5px 11px;
     font: inherit;
-    font-size: 0.8rem;
+    font-size: 0.78rem;
     letter-spacing: 0.5px;
     color: #FFD700;
     background: rgba(26, 26, 46, 0.55);
@@ -1218,4 +1219,9 @@ a.float-top { text-decoration: none; }
     border: none;
     border-radius: 999px;
     cursor: pointer;
+}
+
+@media (max-width: 600px) {
+    .culture-nav { gap: 5px; padding: 6px 0; margin-bottom: 14px; }
+    .culture-nav button { padding: 4px 9px; font-size: 0.72rem; letter-spacing: 0; }
 }
