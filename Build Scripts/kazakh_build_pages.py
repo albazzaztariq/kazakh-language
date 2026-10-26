@@ -56,7 +56,7 @@ WORDS = [
  ("Greetings & basics", [
   ("сәлем","sä-lem","hello"),("сау болыңыз","sau bo-lyn-yz","goodbye"),("рахмет","rah-met","thank you"),
   ("өтінемін","ö-ti-ne-min","please"),("кешіріңіз","ke-shi-riñ-iz","excuse me / sorry"),("иә","i-ä","yes"),
-  ("жоқ","zhoq","no / there is not"),("бар","bar","there is"),("керек","ke-rek","needed / must"),("жақсы","zhaq-sy","good")]),
+  ("жоқ","zhoq","no / there is not"),("бар","bar","there is"),("керек","ke-rek","need / must"),("жақсы","zhaq-sy","good")]),
  ("Pronouns", [
   ("мен","men","I"),("сен","sen","you (informal)"),("сіз","siz","you (formal)"),("ол","ol","he / she / it"),
   ("біз","biz","we"),("сендер","sen-der","you (plural)"),("олар","o-lar","they")]),
