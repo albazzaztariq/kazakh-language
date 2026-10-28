@@ -43,7 +43,8 @@ FOOD_MORE = [("сиыр еті", "si-yr e-ti", "beef"), ("қой еті", "qoi e
 # Every word is looked up by its Kazakh spelling in POOL, so a section is just an ordered list of words and related words can sit together.
 NEW_ROWS = [("бұрын", "bu-ryn", "before / ago (after a time: екі жыл бұрын = two years ago)"), ("кейін", "kei-in", "after / later"),
             ("болашақ", "bo-la-shaq", "future"), ("болашақта", "bo-la-shaq-ta", "in the future"),
-            ("ерте", "er-te", "early"), ("кеш", "kesh", "late / evening")]   # кеш is one word for both late and evening
+            ("ерте", "er-te", "early"), ("картоп", "kar-top", "potato / potatoes"),
+            ("жарты", "zhar-ty", "half (half a portion)"), ("бүтін", "bü-tin", "whole"), ("кеш", "kesh", "late / evening")]   # кеш is one word for both late and evening
 POOL = {}
 for _rows in list(WORDS.values()) + [ADJ_SIZE, ADJ_FEEL, ADJ_STATE, ADJ_MORE, FOOD_MORE, NEW_ROWS, [("тауық", "ta-uyq", "chicken (the bird)")]]:
     for _r in _rows: POOL[_r[0]] = _r
@@ -66,7 +67,7 @@ add("pronouns", "Pronouns", pick(" | ".join(r[0] for r in WORDS["Pronouns"])), "
 add("questions", "Question words", pick(" | ".join(r[0] for r in WORDS["Question words"])), "Questions")
 add("people", "People", pick("адам | бала | дос | мұғалім"), "People")
 add("verbs", "Verbs (dictionary form ends in -у)", pick(" | ".join(r[0] for r in WORDS["Verbs (dictionary form ends in -у)"])), "Verbs")
-add("adjectives", "Adjectives: size, shape and amount", pick(" | ".join(r[0] for r in ADJ_SIZE) + " | көп | аз"), "Adjectives")
+add("adjectives", "Adjectives: size, shape and amount", pick(" | ".join(r[0] for r in ADJ_SIZE) + " | көп | аз | жарты | бүтін"), "Adjectives")
 add("adjectives-feel", "Adjectives: speed, weight and feel", pick(" | ".join(r[0] for r in ADJ_FEEL)))
 add("adjectives-state", "Adjectives: temperature, light and condition", pick(" | ".join(r[0] for r in ADJ_STATE)))
 add("adjectives-taste", "Adjectives: taste", pick("тәтті | тұзды | қышқыл | ащы"))
