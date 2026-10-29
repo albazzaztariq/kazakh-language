@@ -45,8 +45,19 @@ NEW_ROWS = [("бұрын", "bu-ryn", "before / ago (after a time: екі жыл 
             ("болашақ", "bo-la-shaq", "future"), ("болашақта", "bo-la-shaq-ta", "in the future"),
             ("ерте", "er-te", "early"), ("картоп", "kar-top", "potato / potatoes"),
             ("жарты", "zhar-ty", "half (half a portion)"), ("бүтін", "bü-tin", "whole"), ("кеш", "kesh", "late / evening")]   # кеш is one word for both late and evening
+LINKING = [("және", "zhä-ne", "and"), ("бірақ", "bi-raq", "but"), ("ал", "al", "and / but / as for (contrast)"), ("немесе", "ne-me-se", "or"),
+           ("өйткені", "öi-tke-ni", "because"), ("себебі", "se-be-bi", "the reason is / because"), ("сондықтан", "son-dyq-tan", "so / therefore"),
+           ("егер", "e-ger", "if"), ("сосын", "so-syn", "then / after that"), ("сонда", "son-da", "then / in that case"), ("үшін", "ü-shin", "for / in order to"),
+           ("сияқты", "si-yaq-ty", "like / as"), ("мысалы", "my-sa-ly", "for example"), ("яғни", "yagh-ni", "that is / meaning")]
+HELPERS = [("емес", "e-mes", "not / is not"), ("да", "da", "also / too (de after soft vowels)"), ("тағы", "ta-ghy", "again / more / also"), ("әлі", "ä-li", "still / yet"),
+           ("енді", "en-di", "now / next"), ("тек", "tek", "only"), ("әрине", "ä-ri-ne", "of course"), ("мүмкін", "mü-mkin", "maybe / possible"),
+           ("болады", "bo-la-dy", "OK / it is allowed / it will be"), ("бұл", "bul", "this"), ("сол", "sol", "that"), ("мұнда", "mun-da", "here"), ("онда", "on-da", "there"),
+           ("бәрі", "bä-ri", "all / everything / everyone"), ("кейбір", "kei-bir", "some"), ("ештеңе", "esh-te-ñe", "nothing"), ("ешкім", "esh-kim", "nobody")]
+DEGREE = [("әрқашан", "är-qa-shan", "always"), ("жиі", "zhi-i", "often"), ("әдетте", "ä-det-te", "usually"), ("кейде", "kei-de", "sometimes"), ("ешқашан", "esh-qa-shan", "never"),
+          ("өте", "ö-te", "very"), ("тым", "tym", "too (too much)"), ("сәл", "säl", "a little / slightly")]
+GREET_MORE = [("қалайсыз", "qa-lai-syz", "how are you (formal)")]
 POOL = {}
-for _rows in list(WORDS.values()) + [ADJ_SIZE, ADJ_FEEL, ADJ_STATE, ADJ_MORE, FOOD_MORE, NEW_ROWS, [("тауық", "ta-uyq", "chicken (the bird)")]]:
+for _rows in list(WORDS.values()) + [GREET_MORE, LINKING, HELPERS, DEGREE, ADJ_SIZE, ADJ_FEEL, ADJ_STATE, ADJ_MORE, FOOD_MORE, NEW_ROWS, [("тауық", "ta-uyq", "chicken (the bird)")]]:
     for _r in _rows: POOL[_r[0]] = _r
 USED = []
 def pick(words):
@@ -62,9 +73,12 @@ def keep(rows, drop):
     return [r for r in rows if r[0] not in drop]
 SEC = []
 def add(i, title, rows, pill=None): SEC.append((i, title, rows, pill))
-add("basics", "Greetings & basics", pick("сәлем | сау болыңыз | рахмет | өтінемін | кешіріңіз | қалыңыз қалай | қайырлы таң | қайырлы кеш | қош келдіңіз | түсінбедім | қанша тұрады | иә | жоқ | бар | керек"), "Basics")
+add("basics", "Greetings & basics", pick("сәлем | сау болыңыз | рахмет | өтінемін | кешіріңіз | қалайсың | қалайсыз | қайырлы таң | қайырлы кеш | қош келдіңіз | түсінбедім | қанша тұрады | иә | жоқ | бар | керек"), "Basics")
 add("pronouns", "Pronouns", pick(" | ".join(r[0] for r in WORDS["Pronouns"])), "Pronouns")
 add("questions", "Question words", pick(" | ".join(r[0] for r in WORDS["Question words"])), "Questions")
+add("linking", "Linking Words", pick(" | ".join(r[0] for r in LINKING)), "Linking")
+add("helpers", "Helper Words", pick(" | ".join(r[0] for r in HELPERS)), "Helpers")
+add("degree", "How Often & How Much", pick(" | ".join(r[0] for r in DEGREE)), "Often & Very")
 add("people", "People", pick("адам | бала | дос | мұғалім"), "People")
 add("verbs", "Verbs (dictionary form ends in -у)", pick(" | ".join(r[0] for r in WORDS["Verbs (dictionary form ends in -у)"])), "Verbs")
 add("adjectives", "Adjectives: size, shape and amount", pick(" | ".join(r[0] for r in ADJ_SIZE) + " | көп | аз | жарты | бүтін"), "Adjectives")

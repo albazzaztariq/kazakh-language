@@ -93,7 +93,7 @@ def add(kk, en, bases):
     groups = sorted({GROUP[b] for b in bases})
     n = len(ktoks)
     kt = kk[0].upper() + kk[1:]
-    SENT.append({"k": ktoks, "e": etoks, "kt": kt, "et": en, "g": groups, "d": 0 if n <= 3 else 1 if n <= 5 else 2,
+    SENT.append({"k": ktoks, "e": etoks, "kt": kt, "et": en, "g": groups, "d": 0 if len(groups) <= 2 else 1 if len(groups) == 3 else 2,
                  "a": hashlib.sha1(kt.encode("utf-8")).hexdigest()[:12]})   # "a" = name of the Kazakh audio clip in Sentence Audio/
 def sample(items, n):
     items = list(items); rng.shuffle(items); return items[:n]
@@ -158,7 +158,7 @@ for pl in ("менде", "бізде"):
 # questions
 add("Бұл не?", "What is this?", ["не"]); add("Бұл кім?", "Who is this?", ["кім"]); add("Бұл қанша?", "How much is this?", ["қанша"])
 add("Сенің атың кім?", "What is your name?", ["сен", "кім"])
-add("Қалыңыз қалай?", "How are you?", ["қалыңыз қалай"]); add("Қанша тұрады?", "How much does it cost?", ["қанша тұрады"])
+add("Қанша тұрады?", "How much does it cost?", ["қанша тұрады"])
 add("Бұл қанша тұрады?", "How much does this cost?", ["қанша тұрады"])
 add("Қайырлы таң.", "Good morning.", ["қайырлы таң"]); add("Қайырлы кеш.", "Good evening.", ["қайырлы кеш"])
 for t, te in PLACE_Q.items(): add(f"{t[0].upper() + t[1:]} қайда?", f"Where is the {te}?", [t, "қайда"])
@@ -188,6 +188,88 @@ for n, ne, a, ae in NAT:
 for (n1, e1, a1, ae1), (n2, e2, a2, ae2) in sample([(x, y) for x in NAT for y in NAT if x[0] != y[0]], 30):
     add(f"{n1[0].upper() + n1[1:]} {a1}, ал {n2} {a2}.", f"The {e1} is {ae1}, and the {e2} is {ae2}.", [n1, a1, n2, a2])
 for n, ne, poss, a, ae in BODY: add(f"Менің {poss} {a}.", f"My {ne} is {ae}.", [n, a, "мен"])
+# linking words: but, so, because, not, also
+BUT = [("үлкен", "ескі"), ("кіші", "әдемі"), ("жаңа", "қымбат"), ("ескі", "жақсы"), ("үлкен", "арзан"), ("әдемі", "қымбат"), ("кіші", "қымбат"), ("жаңа", "кіші")]
+for o in ("үй", "кітап", "есік"):
+    oe = OBJ_ADJ[o][0]
+    for a1, a2 in BUT:
+        add(f"{o[0].upper() + o[1:]} {a1}, бірақ {a2}.", f"The {oe} is {ADJ_EN[a1]}, but {ADJ_EN[a2]}.", [o, a1, a2, "бірақ"])
+    for a in ("үлкен", "кіші", "жаңа", "ескі", "әдемі"):
+        add(f"Бұл {o} {a} емес.", f"This {oe} is not {ADJ_EN[a]}.", [o, a, "емес"])
+    add(f"Бұл {o} емес.", f"This is not a {oe}.", [o, "емес"])
+    add(f"Бұл {o} үлкен, сондықтан қымбат.", f"This {oe} is big, so it is expensive.", [o, "үлкен", "қымбат", "сондықтан"])
+    add(f"Бұл {o} қымбат, өйткені ол үлкен.", f"This {oe} is expensive, because it is big.", [o, "қымбат", "үлкен", "өйткені", "ол"])
+    add(f"Бұл {o} арзан, өйткені ол ескі.", f"This {oe} is cheap, because it is old.", [o, "арзан", "ескі", "өйткені", "ол"])
+for t in ("ит", "мысық", "ат"):
+    add(f"Бұл {t} емес.", f"This is not a {ANIMAL[t]}.", [t, "емес"])
+for pl in ("менде", "сенде", "бізде", "оларда"):
+    for n in ("кітап", "үй", "ит", "мысық", "дос"):
+        add(f"{pl[0].upper() + pl[1:]} да {n} бар.".replace("менде да", "менде де").replace("сенде да", "сенде де").replace("бізде да", "бізде де").replace("Менде да", "Менде де").replace("Сенде да", "Сенде де").replace("Бізде да", "Бізде де"),
+            f"{PRON_LOC[pl][1].replace('I have', 'I also have').replace('You have', 'You also have').replace('We have', 'We also have').replace('They have', 'They also have')} {HAVE[n]}.", [n, PRON_LOC[pl][0], "да"])
+# how much: very, too, a little
+for o in ("үй", "кітап", "есік"):
+    oe = OBJ_ADJ[o][0]
+    for a in ("үлкен", "кіші", "жаңа", "ескі", "әдемі"):
+        add(f"{o[0].upper() + o[1:]} өте {a}.", f"The {oe} is very {ADJ_EN[a]}.", [o, a, "өте"])
+    for a in ("қымбат", "үлкен", "кіші", "ескі"):
+        add(f"Бұл {o} тым {a}.", f"This {oe} is too {ADJ_EN[a]}.", [o, a, "тым"])
+    for a in ("ескі", "кіші", "қымбат"):
+        add(f"{o[0].upper() + o[1:]} сәл {a}.", f"The {oe} is a little {ADJ_EN[a]}.", [o, a, "сәл"])
+# real-life sentences without adjectives: polite phrases, asking the way, body, school/shop/market today, people
+for pl, ple in (("мектеп", "school"), ("дүкен", "shop"), ("базар", "market")):
+    add(f"Кешіріңіз, {pl} қайда?", f"Excuse me, where is the {ple}?", ["кешіріңіз", pl, "қайда"])
+    add(f"Бүгін {pl} жоқ.", f"There is no {ple} today.", [pl, "бүгін"]); add(f"Ертең {pl} жоқ.", f"There is no {ple} tomorrow.", [pl, "ертең"])
+    add(f"Ертең {pl} бар.", f"There is a {ple} tomorrow.", [pl, "ертең"]); add(f"Кеше {pl} жоқ еді.", f"There was no {ple} yesterday.", [pl, "кеше"])
+add("Кешіріңіз, бұл қанша?", "Excuse me, how much is this?", ["кешіріңіз", "қанша"])
+add("Кешіріңіз, бұл қанша тұрады?", "Excuse me, how much does this cost?", ["кешіріңіз", "қанша тұрады"])
+add("Түсінбедім, кешіріңіз.", "I didn't understand, sorry.", ["түсінбедім", "кешіріңіз"])
+add("Рахмет, сау болыңыз.", "Thank you, goodbye.", ["рахмет", "сау болыңыз"])
+add("Сәлем, қалайсың?", "Hello, how are you?", ["сәлем", "қалайсың"])
+for n, ne in NAMES[:4]:
+    add(f"Сәлем, менің атым {n}.", f"Hello, my name is {ne}.", ["сәлем", "мен"])
+    add(f"Қайырлы таң, менің атым {n}.", f"Good morning, my name is {ne}.", ["қайырлы таң", "мен"])
+    add(f"Қайырлы кеш, менің атым {n}.", f"Good evening, my name is {ne}.", ["қайырлы кеш", "мен"])
+add("Қайырлы таң, сенің атың кім?", "Good morning, what is your name?", ["қайырлы таң", "сен", "кім"])
+add("Сәлем, сенің атың кім?", "Hello, what is your name?", ["сәлем", "сен", "кім"])
+add("Ол кім?", "Who is he?", ["ол", "кім"])
+for p_, pe in (("дос", "friend"), ("әке", "father"), ("ана", "mother"), ("мұғалім", "teacher"), ("аға", "older brother"), ("апа", "older sister")):
+    add(f"Ол менің {P1[p_]}.", f"He is my {pe}.", ["ол", p_, "мен"])
+BODY_P1 = {"бас": ("басым", "head"), "көз": ("көзім", "eye"), "құлақ": ("құлағым", "ear"), "мұрын": ("мұрным", "nose"), "ауыз": ("аузым", "mouth"),
+           "қол": ("қолым", "hand"), "аяқ": ("аяғым", "foot"), "жүрек": ("жүрегім", "heart")}
+for b, (bp, be) in BODY_P1.items():
+    add(f"{b[0].upper() + b[1:]} қайда?", f"Where is the {be}?", [b, "қайда"])
+    add(f"Бұл менің {bp}.", f"This is my {be}.", [b, "мен"])
+    add(f"Бұл сенің {bp[:-2] + 'ің' if bp.endswith('ім') else bp[:-2] + 'ың'}.", f"This is your {be}.", [b, "сен"]) if False else None
+for t, te in (("үй", "house"), ("есік", "door"), ("кітап", "book")):
+    add(f"{t[0].upper() + t[1:]} қайда?", f"Where is the {te}?", [t, "қайда"]) if f"{t[0].upper() + t[1:]} қайда?" not in SEEN else None
+# harder sentences that mix four or more groups
+PEOPLE_ALL = ("дос", "әке", "ана", "аға", "апа", "мұғалім")
+THINGS_ALL = [("үй", "house"), ("кітап", "book"), ("есік", "door"), ("ит", "dog"), ("мысық", "cat")]
+combo = [(p, a1, t, a2) for p in PEOPLE_ALL for a1 in ("жақсы", "жас", "күшті") for (t, _) in THINGS_ALL for a2 in THING_ADJ[t].split() if a2 not in ("көп", "аз")]
+for p_, a1, t, a2 in sample(combo, 110):
+    add(f"Менің {P1[p_]} {a1}, ал сенің {P2[t]} {a2}.", f"My {PERS_EN[p_]} is {ADJ_EN[a1]}, and your {THING_EN[t]} is {ADJ_EN[a2]}.", [p_, a1, t, a2, "мен", "сен"])
+trip = [(x, y, z) for x in ("кітап", "ит", "мысық", "дос", "ат", "бала") for y in ("кітап", "ит", "мысық", "дос", "ат", "бала") for z in ("кітап", "ит", "мысық", "дос", "ат", "бала") if len({x, y, z}) == 3]
+for (x, y, z), pl in sample([(t, pl) for t in trip for pl in ("менде", "бізде")], 70):
+    add(f"{pl[0].upper() + pl[1:]} {x}, {y} және {z} бар.", f"{PRON_LOC[pl][1]} {HAVE[x]}, {HAVE[y]} and {HAVE[z]}.", [x, y, z, PRON_LOC[pl][0]])
+for (c1, c2), (t1, t2) in sample([(c, t) for c in itertools.permutations(COLORS, 2) for t in itertools.permutations(("ит", "мысық", "ат"), 2)], 40):
+    o, a = rng.choice(list(OBJ_ADJ.items()))[0], None
+    a = rng.choice(OBJ_ADJ[o][1].split())
+    add(f"Бұл {c1} {t1}, ал бұл {a} {o}.", f"This is a {ADJ_EN[c1]} {ANIMAL[t1]}, and this is {ART(ADJ_EN[a])} {ADJ_EN[a]} {OBJ_ADJ[o][0]}.", [t1, c1, a, o])
+# needing things and needing to do things: "Маған су керек" (I need water), "Маған бару керек" (I need to go). The dative pronouns are written out by hand.
+DAT = {"маған": ("мен", "I need"), "саған": ("сен", "You need"), "бізге": ("біз", "We need")}
+DAT_VERB = {"маған": ("мен", "I need to"), "саған": ("сен", "You need to"), "бізге": ("біз", "We need to")}
+NEED = {"су": "water", "нан": "bread", "шай": "tea", "сүт": "milk", "ақша": "money", "кітап": "a book", "күріш": "rice", "ет": "meat", "тамақ": "food", "үй": "a house"}
+VERB_EN = {"бару": "go", "келу": "come", "көру": "see", "білу": "know", "алу": "take", "беру": "give", "айту": "say", "жеу": "eat", "ішу": "drink", "оқу": "read",
+           "жазу": "write", "сөйлеу": "speak", "түсіну": "understand"}
+for d, (db, den) in DAT.items():
+    for n, ne in NEED.items():
+        add(f"{d[0].upper() + d[1:]} {n} керек.", f"{den} {ne}.", [n, db, "керек"])
+        if d == "маған": add(f"Маған {n} керек емес.", f"I don't need {ne}.", [n, db, "керек", "емес"])
+for d, (db, den) in DAT_VERB.items():
+    for v, ve in VERB_EN.items():
+        add(f"{d[0].upper() + d[1:]} {v} керек.", f"{den} {ve}.", [v, db, "керек"])
+for v, ve in VERB_EN.items():
+    add(f"{v[0].upper() + v[1:]} керек.", f"It is necessary to {ve}.", [v, "керек"])
 print(f"[DEBUG] {len(SENT)} sentences; Easy {sum(s['d'] == 0 for s in SENT)}, Medium {sum(s['d'] == 1 for s in SENT)}, Hard {sum(s['d'] == 2 for s in SENT)}", flush=True)
 # "Бұл {adj} {noun}" (This is a red house) and "Бұл {noun} {adj}" (This house is red) are both accepted for either English sentence: both orders are good Kazakh.
 # Every "Бұл {adj} {noun}" sentence gets its "Бұл {noun} {adj}" twin if it does not exist yet, then the two are linked.
@@ -215,7 +297,7 @@ print("[DEBUG] starter set gives " + ", ".join(f"{n}: {sum(1 for s in SENT if s[
 # ---- page -----------------------------------------------------------------------------------------------------------------
 JS = r"""
         const MAX_WRONG_PER_SENTENCE = 3, ROUND_SIZE = 10;
-        const DIFFS = [['easy', 'Easy', 0], ['medium', 'Medium', 1], ['hard', 'Hard', 2], ['mixed', 'Mixed', -1]];
+        const DIFFS = [['easy', 'Easy', 0], ['medium', 'Medium', 1], ['hard', 'Hard', 2]];   // difficulty = how many vocabulary groups one sentence draws on (1-2, 3, 4 or more)
         const $ = id => document.getElementById(id);
         const shuffle = a => { a = [...a]; for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
         const setupEl = $('setup'), roundEl = $('round'), groupsEl = $('groups'), goBtn = $('go'), noteEl = $('note'), diffEl = $('diffs');
@@ -237,14 +319,23 @@ JS = r"""
         });
         $('anyBtn').addEventListener('click', () => { anySelected = !anySelected; refresh(); });
         const diffIdx = () => DIFFS.find(d => d[0] === diff)[2];
-        function pool() { const d = diffIdx(); return SENTS.filter(s => (d < 0 || s.d === d) && (anySelected || s.g.every(g => selected.has(g)))); }
+        function pool() { const d = diffIdx(); return SENTS.filter(s => s.d === d && (anySelected || s.g.every(g => selected.has(g)))); }
         function refresh() {
             [...groupsEl.children].forEach(b => { b.setAttribute('aria-pressed', selected.has(b.textContent) ? 'true' : 'false'); b.disabled = anySelected; });
             [...diffEl.children].forEach(b => b.setAttribute('aria-pressed', b.dataset.id === diff ? 'true' : 'false'));
             $('anyBtn').setAttribute('aria-pressed', anySelected ? 'true' : 'false');
             const n = pool().length;
-            noteEl.textContent = n ? n + (n === 1 ? ' sentence matches' : ' sentences match') + (n < ROUND_SIZE ? ', so a round will have ' + n + '.' : '.')
-                                   : 'No sentences match. Tick more groups or change the difficulty.';
+            let text = n ? n + (n === 1 ? ' sentence matches' : ' sentences match') + (n < ROUND_SIZE ? ', so a round will have ' + n + '.' : '.')
+                         : 'No sentences match. Tick more groups or change the difficulty.';
+            if (!anySelected && n < 30) {                                   // say which unticked group would add the most sentences
+                const d = diffIdx(); let best = null, bestN = 0;
+                GROUPS.filter(g => !selected.has(g)).forEach(g => {
+                    const add = SENTS.filter(s => s.d === d && s.g.includes(g) && s.g.every(x => x === g || selected.has(x))).length;
+                    if (add > bestN) { best = g; bestN = add; }
+                });
+                if (best) text += ' Adding “' + best + '” would add ' + bestN + ' more.';
+            }
+            noteEl.textContent = text;
             goBtn.disabled = n === 0;
         }
 
@@ -407,7 +498,7 @@ page = """<!DOCTYPE html>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>%(title)s</title>
-    <link rel="stylesheet" href="styles.css?v=26">
+    <link rel="stylesheet" href="styles.css?v=27">
     <meta name="description" content="%(desc)s">
     <link rel="canonical" href="https://albazzaztariq.github.io/kazakh-language/sentence-game.html">
     <meta name="theme-color" content="#00AFCA">
@@ -430,13 +521,13 @@ page = """<!DOCTYPE html>
                     <button type="button" class="group-btn lang-btn" id="langKk" aria-pressed="false">Kazakh</button>
                     <button type="button" class="group-btn lang-btn" id="langEn" aria-pressed="true">English</button>
                 </div>
-                <div class="setup-title setup-title-groups">Difficulty</div>
+                <div class="setup-title setup-title-groups">Difficulty (how many groups a sentence mixes)</div>
                 <div class="group-grid sc-diffs" id="diffs"></div>
                 <div class="setup-title setup-title-groups">Select the Groups of Vocabulary the Sentences May Use</div>
                 <div class="group-grid" id="groups"></div>
                 <button type="button" class="any-btn" id="anyBtn" aria-pressed="false">Any</button>
                 <div class="deck-size-note sc-note" id="note"></div>
-                <div class="deck-size-note">Little helper words (this, and, was, there is) and names are always allowed. Verbs are not used yet because they need endings.</div>
+                <div class="deck-size-note">Little helper words (this, and, was, there is) and names are always allowed. Verbs appear only in the “need to” form for now, because other forms need endings.</div>
                 <button type="button" class="go-btn" id="go" disabled>Go</button>
             </div>
 

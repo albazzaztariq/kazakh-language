@@ -110,7 +110,7 @@ WORDS = [
  ("Places", [
   ("мектеп","mek-tep","school"),("дүкен","dü-ken","shop"),("базар","ba-zar","market")]),
  ("Useful phrases", [
-  ("қалыңыз қалай","qa-lyñ-yz qa-lai","how are you"),("қайырлы таң","qai-yr-ly tañ","good morning"),
+  ("қалайсың","qa-lai-syñ","how are you (informal)"),("қайырлы таң","qai-yr-ly tañ","good morning"),
   ("қайырлы кеш","qai-yr-ly kesh","good evening"),("қош келдіңіз","qosh kel-diñ-iz","welcome"),
   ("түсінбедім","tü-sin-be-dim","I didn't understand"),("қанша тұрады","qan-sha tu-ra-dy","how much does it cost")]),
 ]
