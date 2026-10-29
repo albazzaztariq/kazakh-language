@@ -258,6 +258,9 @@ JS = r"""
             let fresh = p.filter(s => !usedSet.has(s));
             if (fresh.length < Math.min(ROUND_SIZE, p.length)) { p.forEach(s => usedSet.delete(s)); fresh = p; }
             sents = fresh.slice(0, ROUND_SIZE); sents.forEach(s => usedSet.add(s));
+            beginRound();
+        }
+        function beginRound() {                                            // starts (or restarts) the sentences in `sents`; the words are shuffled afresh each time
             idx = 0; wrongSubmits = 0; wrongSet = new Set();
             resultEl.hidden = true; playEl.hidden = false; setupEl.hidden = true; roundEl.hidden = false;
             showSentence();
@@ -389,7 +392,8 @@ JS = r"""
             playEl.hidden = true; resultEl.hidden = false;
         }
         goBtn.addEventListener('click', () => { if (!goBtn.disabled) startRound(); });
-        $('again').addEventListener('click', startRound);
+        $('fresh').addEventListener('click', startRound);                  // New Deck: other sentences from the same setup
+        $('repeat').addEventListener('click', beginRound);                 // Repeat This Deck: the same sentences again
         function backToSetup() { clearTimeout(nextTimer); stopAudio(); roundEl.hidden = true; setupEl.hidden = false; }
         $('back').addEventListener('click', backToSetup); $('change').addEventListener('click', backToSetup);
         setLang('en'); refresh();
@@ -403,7 +407,7 @@ page = """<!DOCTYPE html>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>%(title)s</title>
-    <link rel="stylesheet" href="styles.css?v=25">
+    <link rel="stylesheet" href="styles.css?v=26">
     <meta name="description" content="%(desc)s">
     <link rel="canonical" href="https://albazzaztariq.github.io/kazakh-language/sentence-game.html">
     <meta name="theme-color" content="#00AFCA">
@@ -462,7 +466,8 @@ page = """<!DOCTYPE html>
                         <div class="missed-list" id="missed"></div>
                     </div>
                     <div class="game-actions">
-                        <button type="button" class="btn" id="again">Play Again</button>
+                        <button type="button" class="btn" id="repeat">Repeat This Deck</button>
+                        <button type="button" class="btn" id="fresh">New Deck</button>
                         <button type="button" class="btn" id="change">Change Setup</button>
                     </div>
                 </div>
