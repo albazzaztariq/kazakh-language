@@ -189,6 +189,13 @@ for (n1, e1, a1, ae1), (n2, e2, a2, ae2) in sample([(x, y) for x in NAT for y in
     add(f"{n1[0].upper() + n1[1:]} {a1}, ал {n2} {a2}.", f"The {e1} is {ae1}, and the {e2} is {ae2}.", [n1, a1, n2, a2])
 for n, ne, poss, a, ae in BODY: add(f"Менің {poss} {a}.", f"My {ne} is {ae}.", [n, a, "мен"])
 print(f"[DEBUG] {len(SENT)} sentences; Easy {sum(s['d'] == 0 for s in SENT)}, Medium {sum(s['d'] == 1 for s in SENT)}, Hard {sum(s['d'] == 2 for s in SENT)}", flush=True)
+# "Бұл {adj} {noun}" (This is a big market) and "Бұл {noun} {adj}" (This market is big) are both accepted for either English sentence: both orders are good Kazakh.
+BYKK = {x["kt"]: x for x in SENT}
+for o, (oe, adjs) in OBJ_ADJ.items():
+    for a in adjs.split():
+        x, y = BYKK[f"Бұл {a} {o}."], BYKK[f"Бұл {o} {a}."]
+        x["alt"] = [{"k": y["k"], "a": y["a"]}]; y["alt"] = [{"k": x["k"], "a": x["a"]}]
+print(f"[DEBUG] {sum('alt' in x for x in SENT)} sentences accept a second Kazakh word order", flush=True)
 rng.shuffle(SENT)
 no_clip = [x["kt"] for x in SENT if not os.path.exists(W + "Sentence Audio/" + x["a"] + ".mp3")]
 assert not no_clip, f"{len(no_clip)} sentences have no audio clip: run build_sentence_audio.py first"
@@ -324,8 +331,8 @@ JS = r"""
 
         // ---- submit ----
         // Audio of the sentence in the language the player just built: the Kazakh clip (Sentence Audio/), or the browser's English voice.
-        let audio = null;
-        const clipUrl = s => 'Sentence%20Audio/' + s.a + '.mp3';
+        let audio = null, clipName = null;
+        const clipUrl = s => 'Sentence%20Audio/' + (clipName || s.a) + '.mp3';
         const canSpeakEnglish = 'speechSynthesis' in window;
         function stopAudio() { if (audio) { audio.pause(); audio = null; } if (canSpeakEnglish) speechSynthesis.cancel(); speakEl.classList.remove('playing'); }
         function playSentence() {
@@ -339,7 +346,13 @@ JS = r"""
         submitEl.addEventListener('click', () => {
             if (solved) { nextSentence(); return; }                         // after a correct answer this button reads Next / Finish
             if (locked || state.bank.length) return;
-            const sol = built(sents[idx]); let ok = true;
+            const s = sents[idx], line = state.line.map(t => t.text);
+            const accepted = [{ k: built(s), a: s.a }].concat(lang === 'en' && s.alt ? s.alt : []);   // alternative Kazakh word orders that are just as good
+            const hits = c => c.k.filter((w, i) => w === line[i]).length;
+            const match = accepted.find(c => hits(c) === c.k.length && c.k.length === line.length);
+            const best = match || accepted.reduce((b, c) => hits(c) > hits(b) ? c : b), sol = best.k;
+            clipName = best.a;                                              // the clip of the order the player actually built
+            let ok = true;
             state.line.forEach((t, i) => { t.status = t.text === sol[i] ? 'ok' : 'bad'; if (t.status === 'bad') ok = false; });
             if (ok) {
                 locked = true; solved = true; msgEl.textContent = 'Correct!'; $('clear').hidden = true;
@@ -384,7 +397,7 @@ page = """<!DOCTYPE html>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>%(title)s</title>
-    <link rel="stylesheet" href="styles.css?v=23">
+    <link rel="stylesheet" href="styles.css?v=24">
     <meta name="description" content="%(desc)s">
     <link rel="canonical" href="https://albazzaztariq.github.io/kazakh-language/sentence-game.html">
     <meta name="theme-color" content="#00AFCA">
