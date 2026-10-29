@@ -1272,3 +1272,8 @@ a.float-top { text-decoration: none; }
     .sc-diffs { grid-template-columns: repeat(2, 1fr); }
     .sc-prompt { font-size: 1.35rem; }
 }
+
+.sc-msg-row { display: flex; align-items: center; justify-content: center; gap: 12px; min-height: 44px; margin-bottom: 8px; }
+.sc-msg-row .sc-msg { min-height: 0; margin: 0; }
+.speak.sc-speak { width: 44px; height: 44px; margin: 0; flex: none; }
+.sc-msg-row [hidden] { display: none; }

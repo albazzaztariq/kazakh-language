@@ -10,7 +10,7 @@ Method : 1) Sentences are generated here from small templates that need NO suffi
             Score = 100 x (1 - wrong submits / (sentences x 3)).
 Output : sentence-game.html (styles live in styles.css under "Sentence game").
 """
-import re, json, html, random, itertools
+import re, json, html, random, itertools, hashlib, os
 print("[DEBUG] sentence game build start", flush=True)
 W = "C:/Users/azt12/OneDrive/Documents/Computing/All Projects/Kazakh Language/Web Version/"
 rng = random.Random(2610)
@@ -92,7 +92,9 @@ def add(kk, en, bases):
     if etoks[0] not in PROPER and etoks[0] != "I": etoks[0] = etoks[0].lower()
     groups = sorted({GROUP[b] for b in bases})
     n = len(ktoks)
-    SENT.append({"k": ktoks, "e": etoks, "kt": kk[0].upper() + kk[1:], "et": en, "g": groups, "d": 0 if n <= 3 else 1 if n <= 5 else 2})
+    kt = kk[0].upper() + kk[1:]
+    SENT.append({"k": ktoks, "e": etoks, "kt": kt, "et": en, "g": groups, "d": 0 if n <= 3 else 1 if n <= 5 else 2,
+                 "a": hashlib.sha1(kt.encode("utf-8")).hexdigest()[:12]})   # "a" = name of the Kazakh audio clip in Sentence Audio/
 def sample(items, n):
     items = list(items); rng.shuffle(items); return items[:n]
 
@@ -188,6 +190,8 @@ for (n1, e1, a1, ae1), (n2, e2, a2, ae2) in sample([(x, y) for x in NAT for y in
 for n, ne, poss, a, ae in BODY: add(f"Менің {poss} {a}.", f"My {ne} is {ae}.", [n, a, "мен"])
 print(f"[DEBUG] {len(SENT)} sentences; Easy {sum(s['d'] == 0 for s in SENT)}, Medium {sum(s['d'] == 1 for s in SENT)}, Hard {sum(s['d'] == 2 for s in SENT)}", flush=True)
 rng.shuffle(SENT)
+no_clip = [x["kt"] for x in SENT if not os.path.exists(W + "Sentence Audio/" + x["a"] + ".mp3")]
+assert not no_clip, f"{len(no_clip)} sentences have no audio clip: run build_sentence_audio.py first"
 GROUPS = [g for g in dict.fromkeys(GROUP.values())]
 STARTER = ["Pronouns", "Adjectives", "Places", "Everyday Nouns", "Colors"]
 assert all(g in GROUPS for g in STARTER)
@@ -197,13 +201,13 @@ print("[DEBUG] starter set gives " + ", ".join(f"{n}: {sum(1 for s in SENT if s[
 
 # ---- page -----------------------------------------------------------------------------------------------------------------
 JS = r"""
-        const MAX_WRONG_PER_SENTENCE = 3, ROUND_SIZE = 10, NEXT_DELAY_MS = 1500;
+        const MAX_WRONG_PER_SENTENCE = 3, ROUND_SIZE = 10;
         const DIFFS = [['easy', 'Easy', 0], ['medium', 'Medium', 1], ['hard', 'Hard', 2], ['mixed', 'Mixed', -1]];
         const $ = id => document.getElementById(id);
         const shuffle = a => { a = [...a]; for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
         const setupEl = $('setup'), roundEl = $('round'), groupsEl = $('groups'), goBtn = $('go'), noteEl = $('note'), diffEl = $('diffs');
         const langKk = $('langKk'), langEn = $('langEn'), lineEl = $('line'), bankEl = $('bank'), submitEl = $('submit'), msgEl = $('msg'), promptEl = $('prompt');
-        const tallyEl = $('tally'), resultEl = $('result'), playEl = $('play'), scoreEl = $('score'), missedBox = $('missedBox'), missedEl = $('missed');
+        const speakEl = $('speak'), tallyEl = $('tally'), resultEl = $('result'), playEl = $('play'), scoreEl = $('score'), missedBox = $('missedBox'), missedEl = $('missed');
         let lang = 'en', diff = 'easy', anySelected = false;                 // lang = language the sentence is SHOWN in ('en' means the player builds Kazakh)
         const selected = new Set(STARTER);
 
@@ -232,8 +236,9 @@ JS = r"""
         }
 
         // ---- round state ----
-        let sents = [], idx = 0, state = null, locked = false, wrongSubmits = 0, wrongSet = new Set(), nextTimer = null, nextId = 1;
+        let sents = [], idx = 0, state = null, locked = false, solved = false, wrongSubmits = 0, wrongSet = new Set(), nextTimer = null, nextId = 1;
         const usedSet = new Set();
+        const SAME = { kk: new Map(SENTS.map(s => [s.k.join(' '), s])), en: new Map(SENTS.map(s => [s.e.join(' '), s])) };   // finds another real sentence with the same words in the same order
         const built = s => lang === 'kk' ? s.e : s.k;                       // the words the player puts in order
         function startRound() {
             const p = shuffle(pool());
@@ -245,7 +250,8 @@ JS = r"""
             showSentence();
         }
         function showSentence() {
-            clearTimeout(nextTimer); locked = false; msgEl.textContent = '';
+            clearTimeout(nextTimer); stopAudio(); locked = false; solved = false; msgEl.textContent = '';
+            speakEl.hidden = true; submitEl.textContent = 'Submit'; $('clear').hidden = false;
             const s = sents[idx], words = built(s);
             tallyEl.textContent = 'Sentence ' + (idx + 1) + ' of ' + sents.length;
             promptEl.textContent = lang === 'kk' ? s.kt : s.et; promptEl.lang = lang === 'kk' ? 'kk' : 'en';
@@ -265,7 +271,7 @@ JS = r"""
             lineEl.innerHTML = ''; bankEl.innerHTML = '';
             state.line.forEach(t => lineEl.appendChild(tileEl(t, 'line'))); state.bank.forEach(t => bankEl.appendChild(tileEl(t, 'bank')));
             lineEl.classList.toggle('empty', !state.line.length);
-            submitEl.disabled = locked || state.bank.length > 0;
+            submitEl.disabled = solved ? false : (locked || state.bank.length > 0);
         }
         function clearStatus() { state.line.concat(state.bank).forEach(t => { delete t.status; }); }
         function remove(t) { state.bank = state.bank.filter(x => x !== t); state.line = state.line.filter(x => x !== t); }
@@ -317,18 +323,42 @@ JS = r"""
         }
 
         // ---- submit ----
+        // Audio of the sentence in the language the player just built: the Kazakh clip (Sentence Audio/), or the browser's English voice.
+        let audio = null;
+        const clipUrl = s => 'Sentence%20Audio/' + s.a + '.mp3';
+        const canSpeakEnglish = 'speechSynthesis' in window;
+        function stopAudio() { if (audio) { audio.pause(); audio = null; } if (canSpeakEnglish) speechSynthesis.cancel(); speakEl.classList.remove('playing'); }
+        function playSentence() {
+            stopAudio(); const s = sents[idx], done = () => speakEl.classList.remove('playing');
+            speakEl.classList.add('playing');
+            if (lang === 'en') { audio = new Audio(clipUrl(s)); audio.onended = done; audio.onerror = done; audio.play().catch(done); }
+            else if (canSpeakEnglish) { const u = new SpeechSynthesisUtterance(s.et); u.lang = 'en-US'; u.rate = 0.95; u.onend = done; u.onerror = done; speechSynthesis.speak(u); }
+            else done();
+        }
+        speakEl.addEventListener('click', playSentence);
         submitEl.addEventListener('click', () => {
+            if (solved) { nextSentence(); return; }                         // after a correct answer this button reads Next / Finish
             if (locked || state.bank.length) return;
             const sol = built(sents[idx]); let ok = true;
             state.line.forEach((t, i) => { t.status = t.text === sol[i] ? 'ok' : 'bad'; if (t.status === 'bad') ok = false; });
-            if (ok) { locked = true; msgEl.textContent = 'Correct!'; nextTimer = setTimeout(nextSentence, NEXT_DELAY_MS); }
-            else { wrongSubmits++; wrongSet.add(sents[idx]); msgEl.textContent = 'The red words are in the wrong place.'; }
+            if (ok) {
+                locked = true; solved = true; msgEl.textContent = 'Correct!'; $('clear').hidden = true;
+                submitEl.textContent = idx === sents.length - 1 ? 'Finish' : 'Next';
+                speakEl.hidden = lang === 'kk' && !canSpeakEnglish; if (!speakEl.hidden) playSentence();
+            }
+            else {
+                wrongSubmits++; wrongSet.add(sents[idx]);
+                const other = SAME[lang === 'en' ? 'kk' : 'en'].get(state.line.map(t => t.text).join(' '));
+                msgEl.textContent = other && other !== sents[idx]
+                    ? 'That order is a real sentence: “' + (lang === 'en' ? other.et : other.kt) + '” It is not the one shown, so the red words are in the wrong place.'
+                    : 'The red words are in the wrong place.';
+            }
             render();
         });
         $('clear').addEventListener('click', () => { if (locked) return; clearStatus(); state.bank = state.bank.concat(state.line); state.line = []; msgEl.textContent = ''; render(); });
         function nextSentence() { idx++; if (idx >= sents.length) finish(); else showSentence(); }
         function finish() {
-            clearTimeout(nextTimer);
+            clearTimeout(nextTimer); stopAudio();
             scoreEl.textContent = Math.max(0, Math.round(100 * (1 - wrongSubmits / (sents.length * MAX_WRONG_PER_SENTENCE))));
             missedEl.innerHTML = ''; const wrong = sents.filter(s => wrongSet.has(s)); missedBox.hidden = !wrong.length;
             wrong.forEach(s => {
@@ -341,7 +371,7 @@ JS = r"""
         }
         goBtn.addEventListener('click', () => { if (!goBtn.disabled) startRound(); });
         $('again').addEventListener('click', startRound);
-        function backToSetup() { clearTimeout(nextTimer); roundEl.hidden = true; setupEl.hidden = false; }
+        function backToSetup() { clearTimeout(nextTimer); stopAudio(); roundEl.hidden = true; setupEl.hidden = false; }
         $('back').addEventListener('click', backToSetup); $('change').addEventListener('click', backToSetup);
         setLang('en'); refresh();
 """
@@ -354,7 +384,7 @@ page = """<!DOCTYPE html>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>%(title)s</title>
-    <link rel="stylesheet" href="styles.css?v=21">
+    <link rel="stylesheet" href="styles.css?v=23">
     <meta name="description" content="%(desc)s">
     <link rel="canonical" href="https://albazzaztariq.github.io/kazakh-language/sentence-game.html">
     <meta name="theme-color" content="#00AFCA">
@@ -394,7 +424,12 @@ page = """<!DOCTYPE html>
                     <div class="game-word sc-prompt" id="prompt"></div>
                     <div class="sc-line empty" id="line" aria-label="Your answer"></div>
                     <div class="sc-bank" id="bank" aria-label="Words to place"></div>
-                    <div class="sc-msg" id="msg" role="status" aria-live="polite"></div>
+                    <div class="sc-msg-row">
+                        <div class="sc-msg" id="msg" role="status" aria-live="polite"></div>
+                        <button type="button" class="speak sc-speak" id="speak" aria-label="Play this sentence" hidden>
+                            <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path fill="currentColor" d="M3 9v6h4l5 4V5L7 9H3zm13.5 3a4.5 4.5 0 0 0-2.5-4v8a4.5 4.5 0 0 0 2.5-4zM14 3.2v2.1a7 7 0 0 1 0 13.4v2.1a9 9 0 0 0 0-17.6z"/></svg>
+                        </button>
+                    </div>
                     <div class="sc-buttons">
                         <button type="button" class="link-btn" id="clear">Clear</button>
                         <button type="button" class="go-btn sc-submit" id="submit" disabled>Submit</button>
