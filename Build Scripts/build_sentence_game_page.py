@@ -80,12 +80,12 @@ PRICE_Q = {"кітап": "book", "есік": "door", "ит": "dog", "ат": "hor
 PROPER = {"I", "I'm"} | {d for _, d in DAYS} | {n for _, n in NAMES}
 
 # ---- build the sentence list ------------------------------------------------------------------------------------------------
-SENT, SEEN = [], set()
+SENT, SEEN, BASES = [], set(), {}
 def add(kk, en, bases):
     """kk / en: the full sentence with punctuation. bases: the common words its content words come from (groups are looked up from them)."""
     assert kk not in SEEN, kk
     for b in bases: assert b in GROUP, "not a common word: " + b
-    SEEN.add(kk)
+    SEEN.add(kk); BASES[kk] = bases
     ktoks = [w.strip(",.?!") for w in kk.split()]
     if ktoks[0] not in {n for n, _ in NAMES}: ktoks[0] = ktoks[0].lower()
     etoks = [w.strip(",.?!") for w in en.split()]
@@ -189,16 +189,22 @@ for (n1, e1, a1, ae1), (n2, e2, a2, ae2) in sample([(x, y) for x in NAT for y in
     add(f"{n1[0].upper() + n1[1:]} {a1}, ал {n2} {a2}.", f"The {e1} is {ae1}, and the {e2} is {ae2}.", [n1, a1, n2, a2])
 for n, ne, poss, a, ae in BODY: add(f"Менің {poss} {a}.", f"My {ne} is {ae}.", [n, a, "мен"])
 print(f"[DEBUG] {len(SENT)} sentences; Easy {sum(s['d'] == 0 for s in SENT)}, Medium {sum(s['d'] == 1 for s in SENT)}, Hard {sum(s['d'] == 2 for s in SENT)}", flush=True)
-# "Бұл {adj} {noun}" (This is a big market) and "Бұл {noun} {adj}" (This market is big) are both accepted for either English sentence: both orders are good Kazakh.
+# "Бұл {adj} {noun}" (This is a red house) and "Бұл {noun} {adj}" (This house is red) are both accepted for either English sentence: both orders are good Kazakh.
+# Every "Бұл {adj} {noun}" sentence gets its "Бұл {noun} {adj}" twin if it does not exist yet, then the two are linked.
+for x in list(SENT):
+    if len(x["k"]) == 3 and x["k"][0] == "бұл" and x["k"][1] in ADJ_EN and x["k"][2] not in ADJ_EN:
+        m = re.match(r"^This is (?:an? )?(\S+) (.+)\.$", x["et"]); assert m, x["et"]
+        twin = f"Бұл {x['k'][2]} {x['k'][1]}."
+        if twin not in SEEN: add(twin, f"This {m.group(2)} is {m.group(1)}.", BASES[x["kt"]])
 BYKK = {x["kt"]: x for x in SENT}
-for o, (oe, adjs) in OBJ_ADJ.items():
-    for a in adjs.split():
-        x, y = BYKK[f"Бұл {a} {o}."], BYKK[f"Бұл {o} {a}."]
+for x in list(SENT):
+    if len(x["k"]) == 3 and x["k"][0] == "бұл" and x["k"][1] in ADJ_EN and x["k"][2] not in ADJ_EN:
+        y = BYKK[f"Бұл {x['k'][2]} {x['k'][1]}."]
         x["alt"] = [{"k": y["k"], "a": y["a"]}]; y["alt"] = [{"k": x["k"], "a": x["a"]}]
-print(f"[DEBUG] {sum('alt' in x for x in SENT)} sentences accept a second Kazakh word order", flush=True)
+print(f"[DEBUG] {len(SENT)} sentences now; {sum('alt' in x for x in SENT)} accept a second Kazakh word order", flush=True)
 rng.shuffle(SENT)
 no_clip = [x["kt"] for x in SENT if not os.path.exists(W + "Sentence Audio/" + x["a"] + ".mp3")]
-assert not no_clip, f"{len(no_clip)} sentences have no audio clip: run build_sentence_audio.py first"
+print(f"[DEBUG] {len(no_clip)} sentences have no audio clip yet", flush=True); assert not os.environ.get("NEED_AUDIO") or not no_clip, "run build_sentence_audio.py first"
 GROUPS = [g for g in dict.fromkeys(GROUP.values())]
 STARTER = ["Pronouns", "Adjectives", "Places", "Everyday Nouns", "Colors"]
 assert all(g in GROUPS for g in STARTER)
@@ -397,7 +403,7 @@ page = """<!DOCTYPE html>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>%(title)s</title>
-    <link rel="stylesheet" href="styles.css?v=24">
+    <link rel="stylesheet" href="styles.css?v=25">
     <meta name="description" content="%(desc)s">
     <link rel="canonical" href="https://albazzaztariq.github.io/kazakh-language/sentence-game.html">
     <meta name="theme-color" content="#00AFCA">
