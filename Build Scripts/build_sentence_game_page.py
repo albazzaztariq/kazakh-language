@@ -346,7 +346,7 @@ JS = r"""
         setLang('en'); refresh();
 """
 
-title = "Kazakh Sentence Constructor Game: Put the Words in Order"
+title = "Kazakh Sentence Constructor: Put the Words in Order"
 desc = "Practise Kazakh word order: a sentence is shown in English or Kazakh and you drag the words of the other language into the right order."
 page = """<!DOCTYPE html>
 <html lang="en">
@@ -364,7 +364,7 @@ page = """<!DOCTYPE html>
         <a href="index.html" class="back-link">&larr; Back to Home</a>
 
         <header>
-            <h1 class="section-title">Sentence Constructor Game</h1>
+            <h1 class="section-title">Sentence Constructor</h1>
             <p class="section-subtitle">Put the words in the right order</p>
         </header>
 
