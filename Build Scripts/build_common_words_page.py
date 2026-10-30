@@ -56,8 +56,24 @@ HELPERS = [("емес", "e-mes", "not / is not"), ("да", "da", "also / too (de
 DEGREE = [("әрқашан", "är-qa-shan", "always"), ("жиі", "zhi-i", "often"), ("әдетте", "ä-det-te", "usually"), ("кейде", "kei-de", "sometimes"), ("ешқашан", "esh-qa-shan", "never"),
           ("өте", "ö-te", "very"), ("тым", "tym", "too (too much)"), ("сәл", "säl", "a little / slightly")]
 GREET_MORE = [("қалайсыз", "qa-lai-syz", "how are you (formal)")]
+TIME_MORE = [("жарты сағат", "zhar-ty sa-ghat", "half an hour"), ("минут", "mi-nut", "minute"), ("секунд", "se-kund", "second"), ("сағат неше", "sa-ghat ne-she", "what time is it?")]
+EVERY = [("әр", "är", "every / each"), ("сағат сайын", "sa-ghat sai-yn", "every hour"), ("күн сайын", "kün sai-yn", "every day"), ("апта сайын", "ap-ta sai-yn", "every week"),
+         ("ай сайын", "ai sai-yn", "every month"), ("жыл сайын", "zhyl sai-yn", "every year"), ("екі сағат сайын", "e-ki sa-ghat sai-yn", "every two hours"),
+         ("екі күнде бір", "e-ki kün-de bir", "every other day"), ("екі аптада бір", "e-ki ap-ta-da bir", "every other week"), ("екі айда бір", "e-ki ai-da bir", "every other month")]
+# Wrestling: most technique names are Russian loan words that Kazakh wrestlers use as they are (written in Cyrillic, pronounced the Kazakh way); a few are Kazakh.
+WRESTLING = [("күрес", "kü-res", "wrestling"), ("күресші", "kü-res-shi", "wrestler"), ("жаттықтырушы", "zhat-tyq-ty-ru-shy", "coach"), ("жаттығу", "zhat-ty-ghu", "training / exercise"),
+             ("баста", "bas-ta", "start! (begin)"), ("тоқта", "toq-ta", "stop!"), ("демалыс", "de-ma-lys", "rest (break)"), ("отдых", "ot-dykh", "rest (Russian term)"),
+             ("стойка", "stoi-ka", "stance"), ("захват", "zakh-vat", "grip / hold"), ("проход", "pro-khod", "shot (leg attack)"), ("в две ноги", "v dve no-gi", "double leg"),
+             ("в одну ногу", "v od-nu no-gu", "single leg"), ("бласт-дабл", "blast dabl", "blast double"), ("отбрасывание", "ot-bras-y-va-nie", "sprawl"),
+             ("обход", "ob-khod", "go-behind (circle behind)"), ("швунг", "shvung", "snap down"), ("боковой", "ba-ka-voi", "side (side sweep)"), ("бросок", "bra-sok", "throw"),
+             ("подножка", "pod-nozh-ka", "trip"), ("подсечка", "pod-sech-ka", "sweep"), ("переворот", "pe-re-va-rot", "turn / roll"), ("мост", "most", "bridge"),
+             ("партер", "par-ter", "mat position (on the mat)"), ("защита", "za-shchi-ta", "defense"), ("атака", "a-ta-ka", "attack"), ("контратака", "kon-tra-ta-ka", "counter-attack"),
+             ("туше", "tu-she", "pin / fall"), ("балл", "ball", "point"), ("предупреждение", "pre-du-pre-zhde-nie", "warning / caution"), ("пассивность", "pas-siv-nost", "stalling (passivity)"),
+             ("судья", "sud-ya", "referee"), ("схватка", "skhvat-ka", "match / bout"), ("ковёр", "ka-vyor", "mat"), ("разминка", "raz-min-ka", "warm-up"),
+             ("борцовки", "bor-tsov-ki", "wrestling shoes"), ("взвешивание", "vzve-shi-va-nie", "weigh-in"), ("жеңіс", "zhe-ñis", "victory"), ("жеңу", "zhe-ñu", "to win"),
+             ("жеңілу", "zhe-ñi-lu", "to lose")]
 POOL = {}
-for _rows in list(WORDS.values()) + [GREET_MORE, LINKING, HELPERS, DEGREE, ADJ_SIZE, ADJ_FEEL, ADJ_STATE, ADJ_MORE, FOOD_MORE, NEW_ROWS, [("тауық", "ta-uyq", "chicken (the bird)")]]:
+for _rows in list(WORDS.values()) + [TIME_MORE, EVERY, WRESTLING, GREET_MORE, LINKING, HELPERS, DEGREE, ADJ_SIZE, ADJ_FEEL, ADJ_STATE, ADJ_MORE, FOOD_MORE, NEW_ROWS, [("тауық", "ta-uyq", "chicken (the bird)")]]:
     for _r in _rows: POOL[_r[0]] = _r
 USED = []
 def pick(words):
@@ -78,7 +94,7 @@ add("pronouns", "Pronouns", pick(" | ".join(r[0] for r in WORDS["Pronouns"])), "
 add("questions", "Question words", pick(" | ".join(r[0] for r in WORDS["Question words"])), "Questions")
 add("linking", "Linking Words", pick(" | ".join(r[0] for r in LINKING)), "Linking")
 add("helpers", "Helper Words", pick(" | ".join(r[0] for r in HELPERS)), "Helpers")
-add("degree", "How Often & How Much", pick(" | ".join(r[0] for r in DEGREE)), "Often & Very")
+add("degree", "How Often & How Much", pick(" | ".join(r[0] for r in DEGREE + EVERY)), "Often & Very")
 add("people", "People", pick("адам | бала | дос | мұғалім"), "People")
 add("verbs", "Verbs (dictionary form ends in -у)", pick(" | ".join(r[0] for r in WORDS["Verbs (dictionary form ends in -у)"])), "Verbs")
 add("adjectives", "Adjectives: size, shape and amount", pick(" | ".join(r[0] for r in ADJ_SIZE) + " | көп | аз | жарты | бүтін"), "Adjectives")
@@ -89,12 +105,13 @@ add("adjectives-more", "Adjectives: more opposites", pick("жақсы | жама
 add("nouns", "Everyday nouns", pick("ақша | кітап | есік"), "Nouns")
 add("colors", "Colors", pick(" | ".join(r[0] for r in WORDS["Colors"])), "Colors")
 add("family", "Family", pick("ана | әке | ата | әже | аға | апа | ұл | қыз"), "Family")
-add("time", "Time", pick("күн | түн | апта | ай | жыл | бұрын | кейін | болашақ | болашақта | уақыт | сағат | қазір | кеше | бүгін | ертең | таңертең | ерте | кеш"), "Time")
+add("time", "Time", pick("күн | түн | апта | ай | жыл | бұрын | кейін | болашақ | болашақта | уақыт | сағат | жарты сағат | минут | секунд | сағат неше | қазір | кеше | бүгін | ертең | таңертең | ерте | кеш"), "Time")
 add("days", "Days of the week", pick(" | ".join(r[0] for r in WORDS["Days of the week"])), "Days")
 add("food", "Food & drink", pick("тамақ | нан | ет | сиыр еті | қой еті | тауық еті | балық | жұмыртқа | ірімшік | май | тұз | қант | сорпа | алма | картоп | күріш | су | шай | сүт | қымыз"), "Food")
 add("animals", "Animals", pick(" | ".join(r[0] for r in WORDS["Animals"]) + " | тауық"), "Animals")
 add("body", "Body", pick(" | ".join(r[0] for r in WORDS["Body"])), "Body")
 add("nature", "Nature", pick(" | ".join(r[0] for r in WORDS["Nature"])), "Nature")
+add("wrestling", "Wrestling", pick(" | ".join(r[0] for r in WRESTLING)), "Wrestling")
 add("places", "Places", pick("үй | қала | ауыл | жол | мектеп | дүкен | базар"), "Places")
 NUMBER_WORDS = {r[0] for r in WORDS.get("Numbers", [])} | set("бір екі үш төрт бес алты жеті сегіз тоғыз он".split())   # these live on numbers.html
 assert set(USED) == set(POOL) - NUMBER_WORDS, ("left out:", set(POOL) - NUMBER_WORDS - set(USED))
