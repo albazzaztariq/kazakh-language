@@ -60,18 +60,16 @@ TIME_MORE = [("жарты сағат", "zhar-ty sa-ghat", "half an hour"), ("м�
 EVERY = [("әр", "är", "every / each"), ("сағат сайын", "sa-ghat sai-yn", "every hour"), ("күн сайын", "kün sai-yn", "every day"), ("апта сайын", "ap-ta sai-yn", "every week"),
          ("ай сайын", "ai sai-yn", "every month"), ("жыл сайын", "zhyl sai-yn", "every year"), ("екі сағат сайын", "e-ki sa-ghat sai-yn", "every two hours"),
          ("екі күнде бір", "e-ki kün-de bir", "every other day"), ("екі аптада бір", "e-ki ap-ta-da bir", "every other week"), ("екі айда бір", "e-ki ai-da bir", "every other month")]
-# Wrestling: most technique names are Russian loan words that Kazakh wrestlers use as they are (written in Cyrillic, pronounced the Kazakh way); a few are Kazakh.
-WRESTLING = [("күрес", "kü-res", "wrestling"), ("күресші", "kü-res-shi", "wrestler"), ("жаттықтырушы", "zhat-tyq-ty-ru-shy", "coach"), ("жаттығу", "zhat-ty-ghu", "training / exercise"),
-             ("баста", "bas-ta", "start! (begin)"), ("тоқта", "toq-ta", "stop!"), ("демалыс", "de-ma-lys", "rest (break)"), ("отдых", "ot-dykh", "rest (Russian term)"),
-             ("стойка", "stoi-ka", "stance"), ("захват", "zakh-vat", "grip / hold"), ("проход", "pro-khod", "shot (leg attack)"), ("в две ноги", "v dve no-gi", "double leg"),
-             ("в одну ногу", "v od-nu no-gu", "single leg"), ("бласт-дабл", "blast dabl", "blast double"), ("отбрасывание", "ot-bras-y-va-nie", "sprawl"),
-             ("обход", "ob-khod", "go-behind (circle behind)"), ("швунг", "shvung", "snap down"), ("боковой", "ba-ka-voi", "side (side sweep)"), ("бросок", "bra-sok", "throw"),
-             ("подножка", "pod-nozh-ka", "trip"), ("подсечка", "pod-sech-ka", "sweep"), ("переворот", "pe-re-va-rot", "turn / roll"), ("мост", "most", "bridge"),
-             ("партер", "par-ter", "mat position (on the mat)"), ("защита", "za-shchi-ta", "defense"), ("атака", "a-ta-ka", "attack"), ("контратака", "kon-tra-ta-ka", "counter-attack"),
-             ("туше", "tu-she", "pin / fall"), ("балл", "ball", "point"), ("предупреждение", "pre-du-pre-zhde-nie", "warning / caution"), ("пассивность", "pas-siv-nost", "stalling (passivity)"),
-             ("судья", "sud-ya", "referee"), ("схватка", "skhvat-ka", "match / bout"), ("ковёр", "ka-vyor", "mat"), ("разминка", "raz-min-ka", "warm-up"),
-             ("борцовки", "bor-tsov-ki", "wrestling shoes"), ("взвешивание", "vzve-shi-va-nie", "weigh-in"), ("жеңіс", "zhe-ñis", "victory"), ("жеңу", "zhe-ñu", "to win"),
-             ("жеңілу", "zhe-ñi-lu", "to lose")]
+# Wrestling: Kazakh words only (referee commands, positions, grips, leg and hand actions and scoring words of qazaqsha kures, Kazakh wrestling, and general wrestling words).
+WRESTLING = [("күрес", "kü-res", "wrestling"), ("күресші", "kü-res-shi", "wrestler"), ("балуан", "ba-luan", "wrestler / strongman"), ("жаттықтырушы", "zhat-tyq-ty-ru-shy", "coach"),
+             ("жаттығу", "zhat-ty-ghu", "training / exercise"), ("төреші", "tö-re-shi", "referee"), ("баста", "bas-ta", "start!"), ("тоқта", "toq-ta", "stop!"),
+             ("үзіліс", "ü-zi-lis", "break / rest (between rounds)"), ("тұрыс", "tu-rys", "stance"), ("белбеу", "bel-beu", "belt"), ("ұстасу", "us-ta-su", "gripping / hand fighting"),
+             ("ұстау", "us-tau", "to hold / grab"), ("шалу", "sha-lu", "trip"), ("ілу", "i-lu", "hook"), ("орау", "o-rau", "wrap"), ("қағу", "qa-ghu", "sweep"),
+             ("көтере қағу", "kö-te-re qa-ghu", "lifting sweep"), ("итеру", "i-te-ru", "to push"), ("тарту", "tar-tu", "to pull"), ("жұлқу", "zhul-qu", "to jerk / yank"),
+             ("қысу", "qy-su", "to squeeze"), ("басу", "ba-su", "to press down"), ("лақтыру", "laq-ty-ru", "to throw"), ("құлату", "qu-la-tu", "to take down / throw down"),
+             ("еңкею", "eñ-ke-yu", "to bend forward"), ("тікею", "ti-ke-yu", "to straighten up"), ("шалқаю", "shal-qa-yu", "to lean back / arch"),
+             ("әдіс-айла", "ä-dis ai-la", "technique / trick"), ("таза жеңіс", "ta-za zhe-ñis", "clean victory (full win)"), ("жартылай жеңіс", "zhar-ty-lai zhe-ñis", "partial victory"),
+             ("жеңіс", "zhe-ñis", "victory"), ("жеңу", "zhe-ñu", "to win"), ("жеңілу", "zhe-ñi-lu", "to lose")]
 POOL = {}
 for _rows in list(WORDS.values()) + [TIME_MORE, EVERY, WRESTLING, GREET_MORE, LINKING, HELPERS, DEGREE, ADJ_SIZE, ADJ_FEEL, ADJ_STATE, ADJ_MORE, FOOD_MORE, NEW_ROWS, [("тауық", "ta-uyq", "chicken (the bird)")]]:
     for _r in _rows: POOL[_r[0]] = _r
