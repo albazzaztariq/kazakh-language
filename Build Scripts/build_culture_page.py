@@ -194,7 +194,8 @@ page = f"""<!DOCTYPE html>
         }}
         buttons.forEach(b => b.addEventListener('click', () => showTopic(b.dataset.topic, true)));
         const fromLink = location.hash.slice(1);
-        if (sections.some(s => s.id === fromLink)) showTopic(fromLink, false);
+        // The page opens on Uyat so it is clear that the buttons switch topics; a link such as culture.html#nauryz opens that topic instead.
+        showTopic(sections.some(s => s.id === fromLink) ? fromLink : 'uyat', false);
     </script>
 </body>
 </html>
