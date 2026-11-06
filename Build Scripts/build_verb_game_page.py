@@ -220,6 +220,7 @@ page = """<!DOCTYPE html>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>%(title)s</title>
+    <link rel="icon" href="favicon.ico" sizes="any"><link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png"><link rel="apple-touch-icon" href="apple-touch-icon.png">
     <link rel="stylesheet" href="styles.css?v=14">
     <meta name="description" content="%(desc)s">
     <link rel="canonical" href="https://albazzaztariq.github.io/kazakh-language/verb-game.html">
